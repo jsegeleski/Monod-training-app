@@ -51,6 +51,20 @@
   }
   function setSession(obj) { localStorage.setItem(SKEY, JSON.stringify(obj || null)); }
   function clearSession() { localStorage.removeItem(SKEY); }
+  function clearAllProgress() {
+  try {
+    // Remove all localStorage keys created by the training app
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('training_progress::')) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch (e) {
+    console.error('[training] clearAllProgress error', e);
+  }
+}
+
 
   // Per-module progress (0-100)
   function getProgressPct(mod) {
@@ -223,24 +237,27 @@ async function renderManagerPicker() {
 
   // Manager-verified reset: clears per-module progress + session (incl. trainee name)
   actions.querySelector('#reset-session').addEventListener('click', async () => {
-    const pw = prompt('Manager password to reset this session:');
-    if (!pw) return;
-    try {
-      const res = await fetch(host + '/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: pw }),
-      });
-      if (!res.ok) { alert('Incorrect password.'); return; }
+  const pw = prompt('Manager password to reset this session:');
+  if (!pw) return;
+  try {
+    const res = await fetch(host + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    if (!res.ok) { alert('Incorrect password.'); return; }
 
-      mods.forEach(m => localStorage.removeItem('training_progress::' + m.id));
-      clearSession();
-      alert('Session reset.');
-      renderManagerGate();
-    } catch {
-      alert('Network issue while resetting. Try again.');
-    }
-  });
+    clearAllProgress();   // <-- clears ALL module progress
+    clearSession();       // <-- clears trainee name + selected modules
+
+    alert('Session reset.');
+    renderManagerGate();
+  } catch (e) {
+    console.error('[training] reset error', e);
+    alert('Network issue while resetting. Try again.');
+  }
+});
+
 
   card.appendChild(grid);
   card.appendChild(actions);
