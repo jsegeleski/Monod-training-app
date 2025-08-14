@@ -1,22 +1,43 @@
 (function(){
   // Create a shadow root to avoid theme CSS collisions
-  const script = document.currentScript;
-  const heroBg = (script?.dataset?.bg || script?.dataset?.hero || '').trim();
-  const moduleId = script?.dataset?.module || "";
-  const accessCodeInitial = script?.dataset?.access || "";
-  const host = new URL(script.src).origin;
+  // Get the current script and config
+const script = document.currentScript;
+const moduleId = script?.dataset?.module || "";
+const accessCodeInitial = script?.dataset?.access || "";
+const host = new URL(script.src).origin;
 
-  const container = document.createElement('div');
+// NEW: allow opting out of Shadow DOM so theme CSS can style our elements
+const useShadow = (script?.dataset?.shadow !== 'off' && script?.dataset?.nosd !== '1');
+
+const container = document.createElement('div');
+document.currentScript.parentNode.insertBefore(container, document.currentScript);
+
+let root, styleEl;
+
+// Mount with or without Shadow DOM
+if (useShadow) {
   const shadow = container.attachShadow({ mode: 'open' });
-  document.currentScript.parentNode.insertBefore(container, document.currentScript);
 
-  const root = document.createElement('div');
+  root = document.createElement('div');
   root.className = 'training-root';
-  const style = document.createElement('link');
-  style.rel = 'stylesheet';
-  style.href = host + '/embed.css';
-  shadow.appendChild(style);
+  styleEl = document.createElement('link');
+  styleEl.rel = 'stylesheet';
+  styleEl.href = host + '/embed.css?v=5';     // bump to beat cache
+
+  shadow.appendChild(styleEl);
   shadow.appendChild(root);
+} else {
+  // No shadow — let the theme style everything
+  container.className = 'training-root';
+  root = container;
+
+  // Load our stylesheet into the document so our scoped rules still apply
+  styleEl = document.createElement('link');
+  styleEl.rel = 'stylesheet';
+  styleEl.href = host + '/embed.css?v=5';
+  document.head.appendChild(styleEl);
+}
+
 
   const el = (tag, attrs={}, children=[]) => {
     const n = document.createElement(tag);
