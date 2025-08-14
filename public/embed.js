@@ -155,80 +155,83 @@ card.appendChild(nameWrap);
   }
 
     async function renderTraineeWelcome(selectedIds) {
-    root.innerHTML = '';
-    const res = await fetch(host + '/api/modules?publishedOnly=1');
-    const data = await res.json();
-    const all = data.modules || [];
-    const mods = all.filter(m => selectedIds.includes(m.id));
-    const sess = getSession();
-const name = sess?.traineeName ? ` — ${sess.traineeName}` : '';
+  root.innerHTML = '';
 
-card.appendChild(el('div', { class: 'training-hero' }, [
-  el('h2', {}, [document.createTextNode(`Welcome to training${name}`)]),
-  el('p', {}, [document.createTextNode('Work through the modules below. You can return home anytime.')])
-]));
+  // Load published modules and filter to the manager’s selection
+  const res = await fetch(host + '/api/modules?publishedOnly=1');
+  const data = await res.json();
+  const all = data.modules || [];
+  const mods = all.filter(m => selectedIds.includes(m.id));
 
+  // Trainee name (optional) from session
+  const sess = getSession();
+  const nameSuffix = sess?.traineeName ? ` — ${sess.traineeName}` : '';
 
-    const card = el('div', { class: 'training-card' });
-    card.appendChild(el('div', { class: 'training-hero' }, [
-      el('h2', {}, [document.createTextNode('Welcome to training')]),
-      el('p', {}, [document.createTextNode('Work through the modules below. You can return home anytime.')])
-    ]));
+  // Card container (define BEFORE appending children)
+  const card = el('div', { class: 'training-card' });
 
-    const grid = el('div', { class: 'training-grid cols-2' },
-      mods.map(m => {
-        const pct = getProgressPct(m);
-const done = pct >= 100;
-const c = el('div', { class: 'module-card' + (done ? ' completed' : '') }, [
-  el('div', { class:'title' }, [document.createTextNode(m.title)]),
-  el('div', { class:'muted' }, [document.createTextNode(m.description || '')]),
-  el('div', { class:'progress-wrap' }, [
-    (function(){
-      const bar = el('div', { class:'progress-bar' }, el('div', { style:`width:${pct}%` }));
-      return bar;
-    })(),
-    el('div', { class:'progress-chip' }, [document.createTextNode(done ? 'Completed' : `${pct}%`)])
-  ]),
-  el('div', {}, [
-    el('button', { class:'btn primary' }, [document.createTextNode(done ? 'Review' : 'Begin')])
-  ])
-]);
+  // Hero
+  card.appendChild(
+    el('div', { class: 'training-hero' }, [
+      el('h2', {}, [document.createTextNode(`Welcome to training${nameSuffix}`)]),
+      el('p', {}, [document.createTextNode('Work through the modules below. You can return home anytime.')]),
+    ])
+  );
 
-        c.querySelector('button').addEventListener('click', () => startSlides(m));
-        return c;
-      })
-    );
+  // Grid of selected modules with compact progress UI
+  const grid = el('div', { class: 'training-grid cols-2' },
+    mods.map(m => {
+      const pct = getProgressPct(m);
+      const done = pct >= 100;
 
-    const actions = el('div', { class:'training-actions' }, [
-      el('button', { class:'btn ghost', id:'reset-session' }, [document.createTextNode('Reset Session')])
-    ]);
+      const c = el('div', { class: 'module-card' + (done ? ' completed' : '') }, [
+        el('div', { class: 'title' }, [document.createTextNode(m.title)]),
+        el('div', { class: 'muted' }, [document.createTextNode(m.description || '')]),
+        el('div', { class: 'progress-wrap' }, [
+          el('div', { class: 'progress-bar' }, el('div', { style: `width:${pct}%` })),
+          el('div', { class: 'progress-chip' }, [document.createTextNode(done ? 'Completed' : `${pct}%`)]),
+        ]),
+        el('div', {}, [
+          el('button', { class: 'btn primary' }, [document.createTextNode(done ? 'Review' : 'Begin')]),
+        ]),
+      ]);
 
-    actions.querySelector('#reset-session').addEventListener('click', async () => {
-  const pw = prompt('Manager password to reset this session:');
-  if (!pw) return;
-  try {
-    const res = await fetch(host + '/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw })
-    });
-    if (!res.ok) { alert('Incorrect password.'); return; }
-    // Clear per-module progress for this session
-    mods.forEach(m => localStorage.removeItem('training_progress::' + m.id));
-    // Clear the session (also removes trainee name; see #3)
-    clearSession();
-    alert('Session reset.');
-    renderManagerGate();
-  } catch {
-    alert('Network issue while resetting. Try again.');
-  }
-});
+      c.querySelector('button').addEventListener('click', () => startSlides(m));
+      return c;
+    })
+  );
 
+  // Actions (Reset Session)
+  const actions = el('div', { class: 'training-actions' }, [
+    el('button', { class: 'btn ghost', id: 'reset-session' }, [document.createTextNode('Reset Session')]),
+  ]);
 
-    card.appendChild(grid);
-    card.appendChild(actions);
-    root.appendChild(card);
-  }
+  // Manager-verified reset: clears per-module progress + session (incl. trainee name)
+  actions.querySelector('#reset-session').addEventListener('click', async () => {
+    const pw = prompt('Manager password to reset this session:');
+    if (!pw) return;
+    try {
+      const res = await fetch(host + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw }),
+      });
+      if (!res.ok) { alert('Incorrect password.'); return; }
+
+      mods.forEach(m => localStorage.removeItem('training_progress::' + m.id));
+      clearSession();
+      alert('Session reset.');
+      renderManagerGate();
+    } catch {
+      alert('Network issue while resetting. Try again.');
+    }
+  });
+
+  card.appendChild(grid);
+  card.appendChild(actions);
+  root.appendChild(card);
+}
+
 
 
 
@@ -270,7 +273,7 @@ const c = el('div', { class: 'module-card' + (done ? ' completed' : '') }, [
     const { idx, lastCheckpoint } = state;
     const slide = module.slides[idx];
     root.innerHTML = '';
-    
+
 const header = el('div', { class: 'training-header' }, [
   el('div', { class: 'training-title' }, [document.createTextNode(module.title)]),
   el('div', {}, [homeBtn])
