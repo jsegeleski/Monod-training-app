@@ -270,7 +270,11 @@ const c = el('div', { class: 'module-card' + (done ? ' completed' : '') }, [
     const { idx, lastCheckpoint } = state;
     const slide = module.slides[idx];
     root.innerHTML = '';
-
+    
+const header = el('div', { class: 'training-header' }, [
+  el('div', { class: 'training-title' }, [document.createTextNode(module.title)]),
+  el('div', {}, [homeBtn])
+]);
     const homeBtn = el('button', { class:'btn ghost', id:'home-btn' }, [document.createTextNode('Home')]);
 homeBtn.addEventListener('click', () => {
   const sess = getSession();
@@ -278,10 +282,7 @@ homeBtn.addEventListener('click', () => {
   // Fallback to module list if no session
   init(true);
 });
-const header = el('div', { class: 'training-header' }, [
-  el('div', { class: 'training-title' }, [document.createTextNode(module.title)]),
-  el('div', {}, [homeBtn])
-]);
+
 
     const progress = ProgressBar(module.slides.length, idx+1);
 
