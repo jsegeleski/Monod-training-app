@@ -97,7 +97,10 @@ function isCompleted(mod) {
       el('div', { class: 'training-body center' }, [
         el('input', { type:'password', class:'input', id:'mgr-pass', placeholder:'Manager password' }),
         el('div', { class: 'training-actions' }, [
-          el('button', { class:'btn primary', id:'mgr-continue' }, [document.createTextNode('Continue')])
+          el('button', {
+  class: 'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width',
+  textContent: 'Continue'
+})
         ])
       ])
     ]);
