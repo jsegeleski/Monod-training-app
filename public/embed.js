@@ -140,7 +140,7 @@ async function renderManagerPicker() {
   );
 
   // Trainee name input
-  const nameWrap = el('div', { class: 'training-body center' }, [
+  const nameWrap = el('div', { class: 'training-body center stack-lg' }, [
   el('input', { type:'text', class:'input', id:'trainee-name', placeholder:"Trainee's name (optional)" })
 ]);
 

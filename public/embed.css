@@ -4,8 +4,9 @@
   color: #0f172a; background: #ffffff; line-height: 1.45;
 }
 .training-card {
-  border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px;
+  border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.06); background: #fff;
+  
 }
 .training-header { display:flex; justify-content: space-between; align-items:center; margin-bottom: 12px; }
 .training-title { font-weight: 700; font-size: 18px; }
@@ -13,9 +14,10 @@
   width: 100%; height: 8px; background: #f1f5f9; border-radius: 9999px; overflow:hidden;
 }
 .training-progress > div { height: 100%; background: #0ea5e9; width: 0%; transition: width .25s ease; }
-.training-body { display: grid; gap: 12px; }
+.training-body { display: grid; gap: 16px; }
 .training-actions { display:flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
 /* Theme-aware buttons (pill) */
+/* Theme-aware buttons (pill) — bigger text */
 .btn {
   --btn-bg: var(--color-button-background, var(--color-button, #111));
   --btn-text: var(--color-button-text, #fff);
@@ -26,12 +28,14 @@
   appearance: none;
   display: inline-flex; align-items: center; justify-content: center;
   gap: 8px;
-  padding: 10px 16px;
-  border-radius: 9999px;   /* pill like Palo Alto */
+  padding: 12px 18px;               /* ↑ a touch larger */
+  border-radius: 9999px;
   border: 1px solid var(--btn-border);
   background: transparent;
   color: var(--btn-border);
   font-weight: 600;
+  font-size: 16px;                   /* ↑ bigger label */
+  line-height: 1.2;
   cursor: pointer;
   transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
@@ -48,6 +52,7 @@
 }
 .btn.ghost { border-color: #cbd5e1; color: #334155; }
 .btn.ghost:hover { background: #f1f5f9; }
+
 /* Hero banner with overlay */
 .training-hero.banner {
   position: relative;
@@ -75,10 +80,10 @@
 .option.wrong { border-color: #ef4444; background: #fef2f2; }
 .muted { color: #64748b; font-size: 13px; }
 .list ul { padding-left: 18px; margin: 6px 0; }
-.training-grid { display:grid; gap: 12px; }
+.training-grid { display:grid; gap: 16px; }
 img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb; }
-.module-card { border:1px solid #e5e7eb; border-radius: 12px; padding: 12px; cursor: pointer; display:flex; flex-direction:column; gap:6px; }
-.module-card:hover { background:#f8fafc; }
+.module-card { border:1px solid #e5e7eb; border-radius: 12px; padding: 16px; cursor: pointer; display:flex; flex-direction:column; gap:6px; min-height:120px; }
+.module-card:hover { background:#f8fafc; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.05); transition: .15s; }
 .training-grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
 .training-card {
   border: 1px solid #e6e6e6;
@@ -97,7 +102,7 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
 .module-card .muted { color: #6b7280; }
 
 /* Manager/Trainee screens */
-.training-hero { text-align:center; padding: 24px 12px; }
+.training-hero { text-align:center; padding: 32px 16px; }
 .training-hero h2 { margin: 0 0 8px; }
 .training-hero p { margin: 0 0 16px; color: #64748b; }
 
@@ -130,12 +135,13 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
 .input {
   width: 100%;
   max-width: 360px;             /* << smaller */
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
   background: #fff;
   color: #0f172a;
   font-weight: 500;
+  font-size: 16px;
 }
 .input:focus {
   outline: none;
@@ -157,6 +163,10 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
   align-items: center;   /* center horizontally */
   gap: 12px;
 }
+
+/* Vertical spacing utility */
+.stack-lg { margin-bottom: 16px; }  /* adds space below an element */
+
 
 
 @media (max-width: 720px) { .training-grid.cols-2 { grid-template-columns: 1fr; } }
