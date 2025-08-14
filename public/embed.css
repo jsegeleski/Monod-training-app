@@ -16,67 +16,48 @@
 .training-progress > div { height: 100%; background: #0ea5e9; width: 0%; transition: width .25s ease; }
 .training-body { display: grid; gap: 16px; }
 /* Base button style */
+/* Base button style */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 1.4rem;
-  border-radius: 4px;
-  font-weight: 500;
-  font-size: 0.95rem;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s ease;
-  text-decoration: none;
-  user-select: none;
-}
-
-/* Primary solid button */
-.btn.btn--solid {
+  display: inline-block;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1rem;
+  font-weight: 600;
   background-color: #000;
   color: #fff;
+  padding: 0.8rem 2rem;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
-.btn.btn--solid:hover {
-  background-color: #222;
+/* Hover effect */
+.btn:hover {
+  background-color: #333;
+  transform: translateY(-2px);
 }
 
 /* Ghost / outline button */
 .btn.ghost {
   background-color: transparent;
-  border: 1px solid #ccc;
-  color: #333;
-}
-
-.btn.ghost:hover {
-  border-color: #000;
+  border: 2px solid #000;
   color: #000;
 }
 
-/* Medium size variant */
-.btn.btn--medium {
-  font-size: 0.95rem;
-  padding: 0.6rem 1.4rem;
+.btn.ghost:hover {
+  background-color: #000;
+  color: #fff;
 }
 
-/* Advanced width/height */
-.btn.btn--advanced-width-height {
-  min-height: 44px;
-  min-width: 120px;
-}
-
-.btn.btn--advanced-adaptive-width {
-  width: auto;
-  max-width: 100%;
-}
-
-/* Centering actions container */
+/* Actions container */
 .training-actions {
   display: flex;
   gap: 1rem;
   justify-content: center;
   margin-top: 1.5rem;
 }
+
 
 
 /* Hero banner with overlay */
