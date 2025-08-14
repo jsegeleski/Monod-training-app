@@ -162,7 +162,7 @@ async function renderManagerPicker() {
   // Actions
   const actions = el('div', { class: 'training-actions', style: 'justify-content:center' }, [
     el('button', { class: 'btn ghost', id: 'cancel' }, [document.createTextNode('Back')]),
-    el('button', { class: 'btn primary', id: 'start' }, [document.createTextNode('Start Session')]),
+    el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width', id: 'start' }, [document.createTextNode('Start Session')]),
   ]);
   card.appendChild(actions);
 
@@ -228,7 +228,7 @@ card.appendChild(hero);
           el('div', { class: 'progress-chip' }, [document.createTextNode(done ? 'Completed' : `${pct}%`)]),
         ]),
         el('div', {}, [
-          el('button', { class: 'btn primary' }, [document.createTextNode(done ? 'Review' : 'Begin')]),
+          el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width' }, [document.createTextNode(done ? 'Review' : 'Begin')]),
         ]),
       ]);
 
@@ -334,7 +334,7 @@ function sanitizeModule(mod) {
             el('div', { class: 'muted' }, [document.createTextNode(m.description || '')]),
             el('div', { class: 'muted' }, [document.createTextNode('Slides: ' + (m.slides?.length || 0))]),
             el('div', {}, [
-              el('button', { class: 'btn primary' }, [document.createTextNode('Open')])
+              el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width' }, [document.createTextNode('Open')])
             ])
           ]);
           c.querySelector('button').addEventListener('click', ()=>{
@@ -392,7 +392,7 @@ function sanitizeModule(mod) {
 
       const actions = el('div', { class: 'training-actions' }, [
         el('button', { class: 'btn ghost' }, [document.createTextNode('Back')]),
-        el('button', { class: 'btn primary' }, [document.createTextNode(idx === total - 1 ? 'Finish' : 'Next')]),
+        el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width' }, [document.createTextNode(idx === total - 1 ? 'Finish' : 'Next')]),
       ]);
 
       actions.children[0].addEventListener('click', () => {
@@ -489,7 +489,7 @@ function sanitizeModule(mod) {
       el('div', { class: 'training-body' }, [
         el('p', {}, [document.createTextNode('Nice work. You can close this window or jump back to modules.')]),
         el('div', { class: 'training-actions' }, [
-          el('button', { class: 'btn' }, [document.createTextNode('Back to modules')])
+          el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width' }, [document.createTextNode('Back to modules')])
         ])
       ])
     ]);
@@ -519,9 +519,9 @@ function sanitizeModule(mod) {
         ]),
         el('div', { class: 'training-body' }, [
           el('p', {}, [document.createTextNode('Enter the access code shared by your manager:')]),
-          el('input', { type:'password', class:'btn', id:'access-input', placeholder:'Access code' }),
+          el('input', { type:'password', class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width', id:'access-input', placeholder:'Access code' }),
           el('div', { class: 'training-actions' }, [
-            el('button', { class: 'btn primary', id:'access-continue' }, [document.createTextNode('Continue')])
+            el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width', id:'access-continue' }, [document.createTextNode('Continue')])
           ])
         ])
       ]);
