@@ -283,6 +283,42 @@ card.appendChild(hero);
   }
 }
 
+function sanitizeModule(mod) {
+  if (!mod || !Array.isArray(mod.slides)) return { ...mod, slides: [] };
+  const slides = mod.slides.map((s, i) => {
+    const type = (s?.type || 'content').trim();
+    if (type === 'quiz') {
+      const q = s?.question || {};
+      const options = Array.isArray(q.options) ? q.options : [];
+      // coerce each option into a safe shape
+      const safeOptions = options.map(o => ({
+        id: o?.id || ('o' + i + Math.random().toString(36).slice(2,6)),
+        text: typeof o?.text === 'string' ? o.text : '',
+        isCorrect: !!o?.isCorrect
+      }));
+      return {
+        id: s?.id || ('s' + i),
+        type: 'quiz',
+        title: typeof s?.title === 'string' ? s.title : 'Quiz',
+        imageUrl: typeof s?.imageUrl === 'string' ? s.imageUrl : '',
+        question: {
+          text: typeof q?.text === 'string' ? q.text : '',
+          options: safeOptions
+        }
+      };
+    }
+    // content slide
+    return {
+      id: s?.id || ('s' + i),
+      type: 'content',
+      title: typeof s?.title === 'string' ? s.title : '',
+      imageUrl: typeof s?.imageUrl === 'string' ? s.imageUrl : '',
+      bodyHtml: typeof s?.bodyHtml === 'string' ? s.bodyHtml : ''
+    };
+  });
+  return { ...mod, slides };
+}
+
 
   function renderModuleList(modules) {
     root.innerHTML = '';
@@ -325,7 +361,7 @@ card.appendChild(hero);
 
     root.innerHTML = '';
 
-    // Header (define button BEFORE using it)
+    // Header
     const homeBtn = el('button', { class: 'btn ghost', id: 'home-btn' }, [document.createTextNode('Home')]);
     homeBtn.addEventListener('click', () => {
       const sess = getSession();
@@ -345,11 +381,10 @@ card.appendChild(hero);
     // CONTENT SLIDE
     if (slide?.type === 'content') {
       if (slide.imageUrl) body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' }));
-      // Optional little "Quiz" chip
-body.appendChild(el('div', { class: 'quiz-label' }, [document.createTextNode('Quiz')]));
-// Make the QUESTION the prominent heading
-body.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 'Question')]));
-
+      body.appendChild(el('h3', {}, [document.createTextNode(slide.title || '')]));
+      const rich = el('div', {});
+      try { rich.innerHTML = slide.bodyHtml || ''; } catch {}
+      body.appendChild(rich);
 
       card.appendChild(header);
       card.appendChild(progress);
@@ -360,14 +395,12 @@ body.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 
         el('button', { class: 'btn primary' }, [document.createTextNode(idx === total - 1 ? 'Finish' : 'Next')]),
       ]);
 
-      // Back
       actions.children[0].addEventListener('click', () => {
         const prev = Math.max(0, idx - 1);
         saveProgress(module.id, prev);
         renderSlide(module, { idx: prev, lastCheckpoint });
       });
 
-      // Next / Finish
       actions.children[1].addEventListener('click', () => {
         if (idx === total - 1) return renderCompletion(module);
         const next = Math.min(total - 1, idx + 1);
@@ -383,37 +416,43 @@ body.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 
     // QUIZ SLIDE
     if (slide?.type === 'quiz') {
       const q = slide.question || { text: '', options: [] };
+      const opts = Array.isArray(q.options) ? q.options : [];
 
       card.appendChild(header);
       card.appendChild(progress);
 
-      body.appendChild(el('h3', {}, [document.createTextNode(slide.title || '')]));
-      body.appendChild(el('div', { class: 'muted' }, [document.createTextNode(q.text || '')]));
+      // Make QUESTION the prominent heading
+      body.appendChild(el('div', { class: 'quiz-label' }, [document.createTextNode('Quiz')]));
+      body.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 'Question')]));
       if (slide.imageUrl) body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' }));
 
-      const optsWrap = el('div', { class: 'training-grid' },
-        (q.options || []).map(o => {
-          const opt = el('div', { class: 'option' }, [document.createTextNode(o.text || '')]);
-          opt.addEventListener('click', () => {
-            const isCorrect = !!o.isCorrect;
-            opt.classList.add(isCorrect ? 'correct' : 'wrong');
-            setTimeout(() => {
-              if (isCorrect) {
-                const next = Math.min(total - 1, idx + 1);
-                saveProgress(module.id, next);
-                if (idx === total - 1) return renderCompletion(module);
-                renderSlide(module, { idx: next, lastCheckpoint: next });
-              } else {
-                const back = Math.max(0, Math.min(lastCheckpoint, total - 1));
-                saveProgress(module.id, back);
-                renderSlide(module, { idx: back, lastCheckpoint });
-              }
-            }, 250);
-          });
-          return opt;
-        })
-      );
-      body.appendChild(optsWrap);
+      if (opts.length === 0) {
+        body.appendChild(el('div', { class: 'muted' }, [document.createTextNode('No options configured yet.')]));
+      } else {
+        const optsWrap = el('div', { class: 'training-grid' },
+          opts.map(o => {
+            const opt = el('div', { class: 'option' }, [document.createTextNode(o.text || '')]);
+            opt.addEventListener('click', () => {
+              const isCorrect = !!o.isCorrect;
+              opt.classList.add(isCorrect ? 'correct' : 'wrong');
+              setTimeout(() => {
+                if (isCorrect) {
+                  const next = Math.min(total - 1, idx + 1);
+                  saveProgress(module.id, next);
+                  if (idx === total - 1) return renderCompletion(module);
+                  renderSlide(module, { idx: next, lastCheckpoint: next });
+                } else {
+                  const back = Math.max(0, Math.min(lastCheckpoint, total - 1));
+                  saveProgress(module.id, back);
+                  renderSlide(module, { idx: back, lastCheckpoint });
+                }
+              }, 250);
+            });
+            return opt;
+          })
+        );
+        body.appendChild(optsWrap);
+      }
 
       const actions = el('div', { class: 'training-actions' }, [
         el('button', { class: 'btn ghost' }, [document.createTextNode('Back')]),
@@ -437,6 +476,7 @@ body.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 
     root.innerHTML = '<div class="training-card">Something went wrong rendering this slide.</div>';
   }
 }
+
 
 
   function renderCompletion(module) {
@@ -499,37 +539,38 @@ body.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 
     startSlides(mod);
   }
 
-  function startSlides(mod) {
+function startSlides(mod) {
   try {
-    if (!mod || !Array.isArray(mod.slides) || mod.slides.length === 0) {
-      console.error('[training] startSlides: invalid module or no slides', mod);
+    const safeMod = sanitizeModule(mod);
+
+    if (!safeMod || !Array.isArray(safeMod.slides) || safeMod.slides.length === 0) {
+      console.error('[training] startSlides: invalid module or no slides', safeMod);
       root.innerHTML = '<div class="training-card">This module has no slides yet.</div>';
       return;
     }
 
     // Determine last checkpoint (first slide after the previous quiz)
     let lastCheckpoint = 0;
-    const progress = loadProgress(mod.id);
+    const progress = loadProgress(safeMod.id);
     let idx = progress ? Number(progress.idx) : 0;
-    if (Number.isNaN(idx)) idx = 0;
+    if (!Number.isFinite(idx)) idx = 0;
 
     if (idx > 0) {
       let sectionStart = 0;
-      for (let i = 0; i <= Math.min(idx, mod.slides.length - 1); i++) {
-        if (mod.slides[i] && mod.slides[i].type === 'quiz') sectionStart = i + 1;
+      for (let i = 0; i <= Math.min(idx, safeMod.slides.length - 1); i++) {
+        if (safeMod.slides[i] && safeMod.slides[i].type === 'quiz') sectionStart = i + 1;
         lastCheckpoint = sectionStart;
       }
     }
 
-    // Clamp idx to bounds
-    idx = Math.max(0, Math.min(idx, mod.slides.length - 1));
-
-    renderSlide(mod, { idx, lastCheckpoint });
+    idx = Math.max(0, Math.min(idx, safeMod.slides.length - 1));
+    renderSlide(safeMod, { idx, lastCheckpoint });
   } catch (e) {
     console.error('[training] startSlides error:', e);
     root.innerHTML = '<div class="training-card">Something went wrong starting this module.</div>';
   }
 }
+
 
 
   async function init() {
