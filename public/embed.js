@@ -108,6 +108,11 @@
       el('h2', {}, [document.createTextNode('Select modules for today')]),
       el('p', {}, [document.createTextNode('Choose the modules this trainee must complete.')])
     ]));
+    const nameWrap = el('div', { class: 'training-body' }, [
+  el('input', { type:'text', class:'btn', id:'trainee-name', placeholder:"Trainee's name (optional)" })
+]);
+card.appendChild(nameWrap);
+
 
     const grid = el('div', { class: 'training-grid cols-2' },
       mods.map(m => {
@@ -137,14 +142,16 @@
     });
 
     actions.querySelector('#start').addEventListener('click', () => {
-      const selected = [];
-      Array.from(grid.children).forEach((node, i) => {
-        if (node.classList.contains('selected')) selected.push(mods[i].id);
-      });
-      if (!selected.length) { alert('Select at least one module.'); return; }
-      setSession({ selected, startedAt: Date.now() });
-      renderTraineeWelcome(selected);
-    });
+  const selected = [];
+  Array.from(grid.children).forEach((node, i) => {
+    if (node.classList.contains('selected')) selected.push(mods[i].id);
+  });
+  if (!selected.length) { alert('Select at least one module.'); return; }
+  const traineeName = (card.querySelector('#trainee-name')?.value || '').trim();
+  setSession({ selected, traineeName, startedAt: Date.now() });
+  renderTraineeWelcome(selected);
+});
+
   }
 
     async function renderTraineeWelcome(selectedIds) {
@@ -153,6 +160,14 @@
     const data = await res.json();
     const all = data.modules || [];
     const mods = all.filter(m => selectedIds.includes(m.id));
+    const sess = getSession();
+const name = sess?.traineeName ? ` — ${sess.traineeName}` : '';
+
+card.appendChild(el('div', { class: 'training-hero' }, [
+  el('h2', {}, [document.createTextNode(`Welcome to training${name}`)]),
+  el('p', {}, [document.createTextNode('Work through the modules below. You can return home anytime.')])
+]));
+
 
     const card = el('div', { class: 'training-card' });
     card.appendChild(el('div', { class: 'training-hero' }, [
@@ -163,21 +178,22 @@
     const grid = el('div', { class: 'training-grid cols-2' },
       mods.map(m => {
         const pct = getProgressPct(m);
-        const done = pct >= 100;
-        const c = el('div', { class: 'module-card' + (done ? ' completed' : '') }, [
-          el('div', { class:'title' }, [document.createTextNode(m.title)]),
-          el('div', { class:'muted' }, [document.createTextNode(m.description || '')]),
-          el('div', { class:'progress-wrap' }, [
-            el('div', { class:'progress-chip' }, [document.createTextNode(done ? 'Completed' : `Progress ${pct}%`)]),
-            (function(){
-              const bar = el('div', { class:'progress-bar' }, el('div', { style:`width:${pct}%` }));
-              return bar;
-            })()
-          ]),
-          el('div', {}, [
-            el('button', { class:'btn primary' }, [document.createTextNode(done ? 'Review' : 'Begin')])
-          ])
-        ]);
+const done = pct >= 100;
+const c = el('div', { class: 'module-card' + (done ? ' completed' : '') }, [
+  el('div', { class:'title' }, [document.createTextNode(m.title)]),
+  el('div', { class:'muted' }, [document.createTextNode(m.description || '')]),
+  el('div', { class:'progress-wrap' }, [
+    (function(){
+      const bar = el('div', { class:'progress-bar' }, el('div', { style:`width:${pct}%` }));
+      return bar;
+    })(),
+    el('div', { class:'progress-chip' }, [document.createTextNode(done ? 'Completed' : `${pct}%`)])
+  ]),
+  el('div', {}, [
+    el('button', { class:'btn primary' }, [document.createTextNode(done ? 'Review' : 'Begin')])
+  ])
+]);
+
         c.querySelector('button').addEventListener('click', () => startSlides(m));
         return c;
       })
@@ -187,13 +203,27 @@
       el('button', { class:'btn ghost', id:'reset-session' }, [document.createTextNode('Reset Session')])
     ]);
 
-    actions.querySelector('#reset-session').addEventListener('click', () => {
-      if (!confirm('Reset selected modules & progress for this session?')) return;
-      // Clear per-module local progress and session selection
-      mods.forEach(m => localStorage.removeItem('training_progress::' + m.id));
-      clearSession();
-      renderManagerGate();
+    actions.querySelector('#reset-session').addEventListener('click', async () => {
+  const pw = prompt('Manager password to reset this session:');
+  if (!pw) return;
+  try {
+    const res = await fetch(host + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
     });
+    if (!res.ok) { alert('Incorrect password.'); return; }
+    // Clear per-module progress for this session
+    mods.forEach(m => localStorage.removeItem('training_progress::' + m.id));
+    // Clear the session (also removes trainee name; see #3)
+    clearSession();
+    alert('Session reset.');
+    renderManagerGate();
+  } catch {
+    alert('Network issue while resetting. Try again.');
+  }
+});
+
 
     card.appendChild(grid);
     card.appendChild(actions);
