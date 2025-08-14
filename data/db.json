@@ -1,0 +1,128 @@
+{
+  "modules": [
+    {
+      "id": "mod_welcome",
+      "title": "Monod Sports — Store Onboarding",
+      "description": "A quick intro to how we do things, with short checks along the way.",
+      "isPublished": true,
+      "accessCode": "",
+      "slides": [
+        {
+          "id": "s1",
+          "type": "content",
+          "title": "Welcome to Monod Sports",
+          "bodyHtml": "<p>Welcome aboard. This training will give you a feel for our standards, voice, and day-to-day flow. Take your time. You can leave and come back—your progress saves in this browser.</p>",
+          "imageUrl": ""
+        },
+        {
+          "id": "s2",
+          "type": "content",
+          "title": "What we value",
+          "bodyHtml": "<ul><li>Keep it clean and minimal.</li><li>Know the product. Speak like a local.</li><li>Customer experience first.</li></ul>",
+          "imageUrl": ""
+        },
+        {
+          "id": "s3",
+          "type": "quiz",
+          "title": "Quick check",
+          "question": {
+            "text": "Which statement best matches our tone?",
+            "options": [
+              {
+                "id": "o1",
+                "text": "Over-the-top hype and emojis everywhere.",
+                "isCorrect": false
+              },
+              {
+                "id": "o2",
+                "text": "Minimal, grounded, culture-first messaging.",
+                "isCorrect": true
+              },
+              {
+                "id": "o3",
+                "text": "Dense technical jargon at all times.",
+                "isCorrect": false
+              }
+            ]
+          },
+          "imageUrl": ""
+        },
+        {
+          "id": "s4",
+          "type": "content",
+          "title": "Stockroom basics",
+          "bodyHtml": "<p>Keep aisles clear. Label everything. Restock on the fly. If you move it, put it back better than you found it.</p>",
+          "imageUrl": ""
+        },
+        {
+          "id": "s5",
+          "type": "quiz",
+          "title": "Quick check — stockroom",
+          "question": {
+            "text": "What’s the golden rule?",
+            "options": [
+              {
+                "id": "o1",
+                "text": "If you move it, leave it somewhere new.",
+                "isCorrect": false
+              },
+              {
+                "id": "o2",
+                "text": "If you move it, put it back better.",
+                "isCorrect": true
+              },
+              {
+                "id": "o3",
+                "text": "Don’t worry about labels.",
+                "isCorrect": false
+              }
+            ]
+          },
+          "imageUrl": ""
+        }
+      ]
+    },
+    {
+      "id": "mod_hike_basics",
+      "title": "Hiking — Product Basics",
+      "description": "A short primer on hiking footwear and essentials.",
+      "isPublished": true,
+      "accessCode": "",
+      "slides": [
+        {
+          "id": "h1",
+          "type": "content",
+          "title": "Footwear fit",
+          "bodyHtml": "<p>Fit is everything. Try on with hiking socks. Toes should have room on descents; heel locked on climbs.</p>",
+          "imageUrl": ""
+        },
+        {
+          "id": "h2",
+          "type": "quiz",
+          "title": "Quick check — fit",
+          "question": {
+            "text": "Best cue for downhill fit?",
+            "options": [
+              {
+                "id": "a1",
+                "text": "Toes slam the front.",
+                "isCorrect": false
+              },
+              {
+                "id": "a2",
+                "text": "A thumb of space at the toes.",
+                "isCorrect": true
+              },
+              {
+                "id": "a3",
+                "text": "Heel lifts wildly.",
+                "isCorrect": false
+              }
+            ]
+          },
+          "imageUrl": ""
+        }
+      ]
+    }
+  ]
+}
