@@ -3,28 +3,30 @@ import path from 'path';
 import { nanoid } from '../../../lib/db';
 
 const DB_PATH = path.join(process.cwd(), 'data', 'db.json');
-function loadDB() { return JSON.parse(readFileSync(DB_PATH, 'utf8')); }
-function saveDB(db) { writeFileSync(DB_PATH, JSON.stringify(db, null, 2)); }
+const loadDB = () => JSON.parse(readFileSync(DB_PATH, 'utf8'));
+const saveDB = (db) => writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
 
-// ✨ Add this tiny helper
-function allowCORS(req, res) {
+function setCORS(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,HEAD');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') { res.status(200).end(); return true; }
-  return false;
 }
 
 export default function handler(req, res) {
-  if (allowCORS(req, res)) return; // <-- handle preflight quickly
+  setCORS(res);
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'HEAD')  return res.status(200).end();
 
   const db = loadDB();
+
   if (req.method === 'GET') {
     const { publishedOnly } = req.query;
     let modules = db.modules;
     if (publishedOnly) modules = modules.filter(m => m.isPublished);
-    return res.json({ modules });
+    return res.status(200).json({ modules });
   }
+
   if (req.method === 'POST') {
     const { title, description, isPublished, accessCode } = req.body || {};
     const id = 'mod_' + nanoid(8);
@@ -33,5 +35,6 @@ export default function handler(req, res) {
     saveDB(db);
     return res.status(201).json({ module: mod });
   }
-  res.status(405).end();
+
+  return res.status(405).end();
 }
