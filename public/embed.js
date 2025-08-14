@@ -1,43 +1,22 @@
 (function(){
   // Create a shadow root to avoid theme CSS collisions
-  // Get the current script and config
-const script = document.currentScript;
-const moduleId = script?.dataset?.module || "";
-const accessCodeInitial = script?.dataset?.access || "";
-const host = new URL(script.src).origin;
+  const script = document.currentScript;
+  const heroBg = (script?.dataset?.bg || script?.dataset?.hero || '').trim();
+  const moduleId = script?.dataset?.module || "";
+  const accessCodeInitial = script?.dataset?.access || "";
+  const host = new URL(script.src).origin;
 
-// NEW: allow opting out of Shadow DOM so theme CSS can style our elements
-const useShadow = (script?.dataset?.shadow !== 'off' && script?.dataset?.nosd !== '1');
-
-const container = document.createElement('div');
-document.currentScript.parentNode.insertBefore(container, document.currentScript);
-
-let root, styleEl;
-
-// Mount with or without Shadow DOM
-if (useShadow) {
+  const container = document.createElement('div');
   const shadow = container.attachShadow({ mode: 'open' });
+  document.currentScript.parentNode.insertBefore(container, document.currentScript);
 
-  root = document.createElement('div');
+  const root = document.createElement('div');
   root.className = 'training-root';
-  styleEl = document.createElement('link');
-  styleEl.rel = 'stylesheet';
-  styleEl.href = host + '/embed.css?v=5';     // bump to beat cache
-
-  shadow.appendChild(styleEl);
+  const style = document.createElement('link');
+  style.rel = 'stylesheet';
+  style.href = host + '/embed.css';
+  shadow.appendChild(style);
   shadow.appendChild(root);
-} else {
-  // No shadow — let the theme style everything
-  container.className = 'training-root';
-  root = container;
-
-  // Load our stylesheet into the document so our scoped rules still apply
-  styleEl = document.createElement('link');
-  styleEl.rel = 'stylesheet';
-  styleEl.href = host + '/embed.css?v=5';
-  document.head.appendChild(styleEl);
-}
-
 
   const el = (tag, attrs={}, children=[]) => {
     const n = document.createElement(tag);
@@ -118,7 +97,7 @@ function isCompleted(mod) {
       el('div', { class: 'training-body center' }, [
         el('input', { type:'password', class:'input', id:'mgr-pass', placeholder:'Manager password' }),
         el('div', { class: 'training-actions' }, [
-          el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width', id:'mgr-continue' }, [document.createTextNode('Continue')])
+          el('button', { class:'btn primary', id:'mgr-continue' }, [document.createTextNode('Continue')])
         ])
       ])
     ]);
@@ -183,7 +162,7 @@ async function renderManagerPicker() {
   // Actions
   const actions = el('div', { class: 'training-actions', style: 'justify-content:center' }, [
     el('button', { class: 'btn ghost', id: 'cancel' }, [document.createTextNode('Back')]),
-    el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width', id: 'start' }, [document.createTextNode('Start Session')]),
+    el('button', { class: 'btn primary', id: 'start' }, [document.createTextNode('Start Session')]),
   ]);
   card.appendChild(actions);
 
@@ -249,7 +228,7 @@ card.appendChild(hero);
           el('div', { class: 'progress-chip' }, [document.createTextNode(done ? 'Completed' : `${pct}%`)]),
         ]),
         el('div', {}, [
-          el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width' }, [document.createTextNode(done ? 'Review' : 'Begin')]),
+          el('button', { class: 'btn primary' }, [document.createTextNode(done ? 'Review' : 'Begin')]),
         ]),
       ]);
 
@@ -355,7 +334,7 @@ function sanitizeModule(mod) {
             el('div', { class: 'muted' }, [document.createTextNode(m.description || '')]),
             el('div', { class: 'muted' }, [document.createTextNode('Slides: ' + (m.slides?.length || 0))]),
             el('div', {}, [
-              el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width' }, [document.createTextNode('Open')])
+              el('button', { class: 'btn primary' }, [document.createTextNode('Open')])
             ])
           ]);
           c.querySelector('button').addEventListener('click', ()=>{
@@ -413,7 +392,7 @@ function sanitizeModule(mod) {
 
       const actions = el('div', { class: 'training-actions' }, [
         el('button', { class: 'btn ghost' }, [document.createTextNode('Back')]),
-        el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width' }, [document.createTextNode(idx === total - 1 ? 'Finish' : 'Next')]),
+        el('button', { class: 'btn primary' }, [document.createTextNode(idx === total - 1 ? 'Finish' : 'Next')]),
       ]);
 
       actions.children[0].addEventListener('click', () => {
@@ -510,7 +489,7 @@ function sanitizeModule(mod) {
       el('div', { class: 'training-body' }, [
         el('p', {}, [document.createTextNode('Nice work. You can close this window or jump back to modules.')]),
         el('div', { class: 'training-actions' }, [
-          el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width' }, [document.createTextNode('Back to modules')])
+          el('button', { class: 'btn' }, [document.createTextNode('Back to modules')])
         ])
       ])
     ]);
@@ -540,9 +519,9 @@ function sanitizeModule(mod) {
         ]),
         el('div', { class: 'training-body' }, [
           el('p', {}, [document.createTextNode('Enter the access code shared by your manager:')]),
-          el('input', { type:'password', class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width', id:'access-input', placeholder:'Access code' }),
+          el('input', { type:'password', class:'btn', id:'access-input', placeholder:'Access code' }),
           el('div', { class: 'training-actions' }, [
-            el('button', { class:'btn btn--solid btn--medium btn--primary btn--advanced-width-height btn--advanced-adaptive-width', id:'access-continue' }, [document.createTextNode('Continue')])
+            el('button', { class: 'btn primary', id:'access-continue' }, [document.createTextNode('Continue')])
           ])
         ])
       ]);
