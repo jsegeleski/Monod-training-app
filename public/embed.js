@@ -97,62 +97,77 @@
     });
   }
 
-  async function renderManagerPicker() {
-    root.innerHTML = '';
-    const res = await fetch(host + '/api/modules?publishedOnly=1');
-    const data = await res.json();
-    const mods = (data.modules || []).slice(); // copy
+async function renderManagerPicker() {
+  root.innerHTML = '';
 
-    const card = el('div', { class: 'training-card' });
-    card.appendChild(el('div', { class: 'training-hero' }, [
+  // Fetch published modules
+  const res = await fetch(host + '/api/modules?publishedOnly=1');
+  const data = await res.json();
+  const mods = (data.modules || []).slice();
+
+  // Card
+  const card = el('div', { class: 'training-card' });
+
+  // Hero
+  card.appendChild(
+    el('div', { class: 'training-hero' }, [
       el('h2', {}, [document.createTextNode('Select modules for today')]),
-      el('p', {}, [document.createTextNode('Choose the modules this trainee must complete.')])
-    ]));
-    const nameWrap = el('div', { class: 'training-body' }, [
-  el('input', { type:'text', class:'btn', id:'trainee-name', placeholder:"Trainee's name (optional)" })
-]);
-card.appendChild(nameWrap);
+      el('p', {}, [document.createTextNode('Choose the modules this trainee must complete.')]),
+    ])
+  );
 
+  // Trainee name input
+  const nameWrap = el('div', { class: 'training-body' }, [
+    el('input', {
+      type: 'text',
+      class: 'btn',
+      id: 'trainee-name',
+      placeholder: "Trainee's name (optional)"
+    })
+  ]);
+  card.appendChild(nameWrap);
 
-    const grid = el('div', { class: 'training-grid cols-2' },
-      mods.map(m => {
-        const c = el('div', { class: 'module-card' }, [
-          el('div', { class: 'title' }, [document.createTextNode(m.title)]),
-          el('div', { class: 'muted' }, [document.createTextNode(m.description || '')]),
-        ]);
-        c.addEventListener('click', () => {
-          c.classList.toggle('selected');
-        });
-        return c;
-      })
-    );
+  // Module grid (click to toggle)
+  const grid = el('div', { class: 'training-grid cols-2' },
+    mods.map(m => {
+      const c = el('div', { class: 'module-card' }, [
+        el('div', { class: 'title' }, [document.createTextNode(m.title)]),
+        el('div', { class: 'muted' }, [document.createTextNode(m.description || '')]),
+      ]);
+      c.addEventListener('click', () => c.classList.toggle('selected'));
+      return c;
+    })
+  );
+  card.appendChild(grid);
 
-    const actions = el('div', { class: 'training-actions' }, [
-      el('button', { class:'btn ghost', id:'cancel' }, [document.createTextNode('Back')]),
-      el('button', { class:'btn primary', id:'start' }, [document.createTextNode('Start Session')]),
-    ]);
+  // Actions
+  const actions = el('div', { class: 'training-actions' }, [
+    el('button', { class: 'btn ghost', id: 'cancel' }, [document.createTextNode('Back')]),
+    el('button', { class: 'btn primary', id: 'start' }, [document.createTextNode('Start Session')]),
+  ]);
+  card.appendChild(actions);
 
-    card.appendChild(grid);
-    card.appendChild(actions);
-    root.appendChild(card);
-
-    actions.querySelector('#cancel').addEventListener('click', () => {
-      clearSession();
-      renderManagerGate();
-    });
-
-    actions.querySelector('#start').addEventListener('click', () => {
-  const selected = [];
-  Array.from(grid.children).forEach((node, i) => {
-    if (node.classList.contains('selected')) selected.push(mods[i].id);
+  // Wire buttons
+  actions.querySelector('#cancel').addEventListener('click', () => {
+    clearSession();
+    renderManagerGate();
   });
-  if (!selected.length) { alert('Select at least one module.'); return; }
-  const traineeName = (card.querySelector('#trainee-name')?.value || '').trim();
-  setSession({ selected, traineeName, startedAt: Date.now() });
-  renderTraineeWelcome(selected);
-});
 
-  }
+  actions.querySelector('#start').addEventListener('click', () => {
+    const selected = [];
+    Array.from(grid.children).forEach((node, i) => {
+      if (node.classList.contains('selected')) selected.push(mods[i].id);
+    });
+    if (!selected.length) { alert('Select at least one module.'); return; }
+    const traineeName = (card.querySelector('#trainee-name')?.value || '').trim();
+    setSession({ selected, traineeName, startedAt: Date.now() });
+    renderTraineeWelcome(selected);
+  });
+
+  // Mount
+  root.appendChild(card);
+}
+
 
     async function renderTraineeWelcome(selectedIds) {
   root.innerHTML = '';
@@ -270,109 +285,129 @@ card.appendChild(nameWrap);
   }
 
   function renderSlide(module, state) {
-    const { idx, lastCheckpoint } = state;
+  try {
+    const total = Array.isArray(module?.slides) ? module.slides.length : 0;
+    if (total === 0) {
+      root.innerHTML = '<div class="training-card">This module has no slides yet.</div>';
+      return;
+    }
+
+    const idx = Math.max(0, Math.min(Number(state?.idx ?? 0), total - 1));
+    const lastCheckpoint = Math.max(0, Math.min(Number(state?.lastCheckpoint ?? 0), total - 1));
     const slide = module.slides[idx];
+
     root.innerHTML = '';
 
-const header = el('div', { class: 'training-header' }, [
-  el('div', { class: 'training-title' }, [document.createTextNode(module.title)]),
-  el('div', {}, [homeBtn])
-]);
-    const homeBtn = el('button', { class:'btn ghost', id:'home-btn' }, [document.createTextNode('Home')]);
-homeBtn.addEventListener('click', () => {
-  const sess = getSession();
-  if (sess?.selected?.length) return renderTraineeWelcome(sess.selected);
-  // Fallback to module list if no session
-  init(true);
-});
+    // Header (define button BEFORE using it)
+    const homeBtn = el('button', { class: 'btn ghost', id: 'home-btn' }, [document.createTextNode('Home')]);
+    homeBtn.addEventListener('click', () => {
+      const sess = getSession();
+      if (sess?.selected?.length) return renderTraineeWelcome(sess.selected);
+      init(true);
+    });
 
+    const header = el('div', { class: 'training-header' }, [
+      el('div', { class: 'training-title' }, [document.createTextNode(module.title || 'Training')]),
+      el('div', {}, [homeBtn]),
+    ]);
 
-    const progress = ProgressBar(module.slides.length, idx+1);
-
+    const progress = ProgressBar(total, idx + 1);
     const body = el('div', { class: 'training-body' });
     const card = el('div', { class: 'training-card' });
 
-    if (slide.type === 'content') {
-      const listWrap = el('div', { class: 'list' });
-      if (slide.imageUrl) {
-        body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title }));
-      }
-      body.appendChild(el('h3', {}, [document.createTextNode(slide.title)]));
-      const content = el('div', { html: slide.bodyHtml || '' });
-      listWrap.appendChild(content);
-      body.appendChild(listWrap);
+    // CONTENT SLIDE
+    if (slide?.type === 'content') {
+      if (slide.imageUrl) body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' }));
+      body.appendChild(el('h3', {}, [document.createTextNode(slide.title || '')] ));
+      body.appendChild(el('div', { html: slide.bodyHtml || '' }));
+
       card.appendChild(header);
       card.appendChild(progress);
       card.appendChild(body);
+
       const actions = el('div', { class: 'training-actions' }, [
         el('button', { class: 'btn ghost' }, [document.createTextNode('Back')]),
-        el('button', { class: 'btn primary' }, [document.createTextNode(idx === module.slides.length -1 ? 'Finish' : 'Next')])
+        el('button', { class: 'btn primary' }, [document.createTextNode(idx === total - 1 ? 'Finish' : 'Next')]),
       ]);
-      actions.children[0].addEventListener('click', ()=>{
-        const prev = Math.max(0, idx-1);
-        const newState = { idx: prev, lastCheckpoint };
+
+      // Back
+      actions.children[0].addEventListener('click', () => {
+        const prev = Math.max(0, idx - 1);
         saveProgress(module.id, prev);
-        renderSlide(module, newState);
+        renderSlide(module, { idx: prev, lastCheckpoint });
       });
-      actions.children[1].addEventListener('click', ()=>{
-        const next = Math.min(module.slides.length-1, idx+1);
-        const newState = { idx: next, lastCheckpoint };
+
+      // Next / Finish
+      actions.children[1].addEventListener('click', () => {
+        if (idx === total - 1) return renderCompletion(module);
+        const next = Math.min(total - 1, idx + 1);
         saveProgress(module.id, next);
-        if (idx === module.slides.length - 1) return renderCompletion(module);
-        renderSlide(module, newState);
+        renderSlide(module, { idx: next, lastCheckpoint });
       });
+
       card.appendChild(actions);
       root.appendChild(card);
-    } else if (slide.type === 'quiz') {
+      return;
+    }
+
+    // QUIZ SLIDE
+    if (slide?.type === 'quiz') {
+      const q = slide.question || { text: '', options: [] };
+
       card.appendChild(header);
       card.appendChild(progress);
-      const q = slide.question || { text:'', options:[] };
-      body.appendChild(el('h3', {}, [document.createTextNode(slide.title)]));
+
+      body.appendChild(el('h3', {}, [document.createTextNode(slide.title || '')]));
       body.appendChild(el('div', { class: 'muted' }, [document.createTextNode(q.text || '')]));
-      if (slide.imageUrl) body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title }));
-      const optsWrap = el('div', { class: 'training-grid' }, q.options.map(o => {
-        const opt = el('div', { class: 'option' }, [document.createTextNode(o.text)]);
-        opt.addEventListener('click', ()=>{
-          // evaluate
-          const isCorrect = !!o.isCorrect;
-          if (isCorrect) {
-            opt.classList.add('correct');
-          } else {
-            opt.classList.add('wrong');
-          }
-          setTimeout(()=>{
-            if (isCorrect) {
-              const next = Math.min(module.slides.length-1, idx+1);
-              const newState = { idx: next, lastCheckpoint: next }; // set new checkpoint after a passed quiz
-              saveProgress(module.id, next);
-              if (idx === module.slides.length - 1) return renderCompletion(module);
-              renderSlide(module, newState);
-            } else {
-              // go back to last checkpoint (section start)
-              const back = lastCheckpoint;
-              const newState = { idx: back, lastCheckpoint };
-              saveProgress(module.id, back);
-              renderSlide(module, newState);
-            }
-          }, 300);
-        });
-        return opt;
-      }));
+      if (slide.imageUrl) body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' }));
+
+      const optsWrap = el('div', { class: 'training-grid' },
+        (q.options || []).map(o => {
+          const opt = el('div', { class: 'option' }, [document.createTextNode(o.text || '')]);
+          opt.addEventListener('click', () => {
+            const isCorrect = !!o.isCorrect;
+            opt.classList.add(isCorrect ? 'correct' : 'wrong');
+            setTimeout(() => {
+              if (isCorrect) {
+                const next = Math.min(total - 1, idx + 1);
+                saveProgress(module.id, next);
+                if (idx === total - 1) return renderCompletion(module);
+                renderSlide(module, { idx: next, lastCheckpoint: next });
+              } else {
+                const back = Math.max(0, Math.min(lastCheckpoint, total - 1));
+                saveProgress(module.id, back);
+                renderSlide(module, { idx: back, lastCheckpoint });
+              }
+            }, 250);
+          });
+          return opt;
+        })
+      );
       body.appendChild(optsWrap);
-      card.appendChild(body);
+
       const actions = el('div', { class: 'training-actions' }, [
-        el('button', { class: 'btn ghost' }, [document.createTextNode('Back')])
+        el('button', { class: 'btn ghost' }, [document.createTextNode('Back')]),
       ]);
-      actions.children[0].addEventListener('click', ()=>{
-        const prev = Math.max(0, idx-1);
-        const newState = { idx: prev, lastCheckpoint };
+      actions.children[0].addEventListener('click', () => {
+        const prev = Math.max(0, idx - 1);
         saveProgress(module.id, prev);
-        renderSlide(module, newState);
+        renderSlide(module, { idx: prev, lastCheckpoint });
       });
+
+      card.appendChild(body);
       card.appendChild(actions);
       root.appendChild(card);
+      return;
     }
+
+    // Unknown slide type fallback
+    root.innerHTML = '<div class="training-card">Unsupported slide type.</div>';
+  } catch (e) {
+    console.error('[training] renderSlide error:', e);
+    root.innerHTML = '<div class="training-card">Something went wrong rendering this slide.</div>';
   }
+}
+
 
   function renderCompletion(module) {
     root.innerHTML = '';
@@ -435,21 +470,37 @@ homeBtn.addEventListener('click', () => {
   }
 
   function startSlides(mod) {
-    // Determine the last checkpoint (first slide after the previous quiz)
+  try {
+    if (!mod || !Array.isArray(mod.slides) || mod.slides.length === 0) {
+      console.error('[training] startSlides: invalid module or no slides', mod);
+      root.innerHTML = '<div class="training-card">This module has no slides yet.</div>';
+      return;
+    }
+
+    // Determine last checkpoint (first slide after the previous quiz)
     let lastCheckpoint = 0;
     const progress = loadProgress(mod.id);
-    let idx = progress ? progress.idx : 0;
+    let idx = progress ? Number(progress.idx) : 0;
+    if (Number.isNaN(idx)) idx = 0;
+
     if (idx > 0) {
-      // Set checkpoint as first slide after the previous quiz before idx
-      for (let i = 0, sectionStart = 0; i <= idx; i++) {
-        if (mod.slides[i]?.type === 'quiz') sectionStart = i + 1;
+      let sectionStart = 0;
+      for (let i = 0; i <= Math.min(idx, mod.slides.length - 1); i++) {
+        if (mod.slides[i] && mod.slides[i].type === 'quiz') sectionStart = i + 1;
         lastCheckpoint = sectionStart;
       }
-    } else {
-      lastCheckpoint = 0;
     }
+
+    // Clamp idx to bounds
+    idx = Math.max(0, Math.min(idx, mod.slides.length - 1));
+
     renderSlide(mod, { idx, lastCheckpoint });
+  } catch (e) {
+    console.error('[training] startSlides error:', e);
+    root.innerHTML = '<div class="training-card">Something went wrong starting this module.</div>';
   }
+}
+
 
   async function init() {
     // If a moduleId is specified, load directly. Otherwise list modules.
