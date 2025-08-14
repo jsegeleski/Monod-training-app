@@ -44,6 +44,164 @@
     } catch { return null; }
   }
 
+    // Session storage keys
+  const SKEY = 'training_session::v1';
+  function getSession() {
+    try { return JSON.parse(localStorage.getItem(SKEY) || 'null'); } catch { return null; }
+  }
+  function setSession(obj) { localStorage.setItem(SKEY, JSON.stringify(obj || null)); }
+  function clearSession() { localStorage.removeItem(SKEY); }
+
+  // Per-module progress (0-100)
+  function getProgressPct(mod) {
+    const p = loadProgress(mod.id);
+    if (!mod?.slides?.length) return 0;
+    const idx = Math.max(0, (p?.idx ?? 0));
+    const pct = Math.round(((idx+1) / mod.slides.length) * 100);
+    return Math.min(100, Math.max(0, pct));
+  }
+  function isCompleted(mod) {
+    return getProgressPct(mod) >= 100;
+  }
+
+    function renderManagerGate() {
+    root.innerHTML = '';
+    const card = el('div', { class: 'training-card' }, [
+      el('div', { class: 'training-hero' }, [
+        el('h2', {}, [document.createTextNode('Staff Training')]),
+        el('p', {}, [document.createTextNode('Manager access required to start a session.')])
+      ]),
+      el('div', { class: 'training-body' }, [
+        el('input', { type:'password', class:'btn', id:'mgr-pass', placeholder:'Manager password' }),
+        el('div', { class: 'training-actions' }, [
+          el('button', { class:'btn primary', id:'mgr-continue' }, [document.createTextNode('Continue')])
+        ])
+      ])
+    ]);
+    root.appendChild(card);
+    card.querySelector('#mgr-continue').addEventListener('click', async () => {
+      const val = card.querySelector('#mgr-pass').value || '';
+      // Validate against server admin the simplest way: call /admin (CORS, but we only need same pw)
+      // We can't read admin env here, so just post to login and check 200.
+      try {
+        const res = await fetch(host + '/api/auth/login', {
+          method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: val })
+        });
+        if (!res.ok) { alert('Incorrect password'); return; }
+        // Do not keep cookie; this cookie is httpOnly and domain-bound. We only need to know it passed.
+        setSession({ selected: [], startedAt: Date.now() });
+        renderManagerPicker();
+      } catch {
+        alert('Could not validate password. Check network.');
+      }
+    });
+  }
+
+  async function renderManagerPicker() {
+    root.innerHTML = '';
+    const res = await fetch(host + '/api/modules?publishedOnly=1');
+    const data = await res.json();
+    const mods = (data.modules || []).slice(); // copy
+
+    const card = el('div', { class: 'training-card' });
+    card.appendChild(el('div', { class: 'training-hero' }, [
+      el('h2', {}, [document.createTextNode('Select modules for today')]),
+      el('p', {}, [document.createTextNode('Choose the modules this trainee must complete.')])
+    ]));
+
+    const grid = el('div', { class: 'training-grid cols-2' },
+      mods.map(m => {
+        const c = el('div', { class: 'module-card' }, [
+          el('div', { class: 'title' }, [document.createTextNode(m.title)]),
+          el('div', { class: 'muted' }, [document.createTextNode(m.description || '')]),
+        ]);
+        c.addEventListener('click', () => {
+          c.classList.toggle('selected');
+        });
+        return c;
+      })
+    );
+
+    const actions = el('div', { class: 'training-actions' }, [
+      el('button', { class:'btn ghost', id:'cancel' }, [document.createTextNode('Back')]),
+      el('button', { class:'btn primary', id:'start' }, [document.createTextNode('Start Session')]),
+    ]);
+
+    card.appendChild(grid);
+    card.appendChild(actions);
+    root.appendChild(card);
+
+    actions.querySelector('#cancel').addEventListener('click', () => {
+      clearSession();
+      renderManagerGate();
+    });
+
+    actions.querySelector('#start').addEventListener('click', () => {
+      const selected = [];
+      Array.from(grid.children).forEach((node, i) => {
+        if (node.classList.contains('selected')) selected.push(mods[i].id);
+      });
+      if (!selected.length) { alert('Select at least one module.'); return; }
+      setSession({ selected, startedAt: Date.now() });
+      renderTraineeWelcome(selected);
+    });
+  }
+
+    async function renderTraineeWelcome(selectedIds) {
+    root.innerHTML = '';
+    const res = await fetch(host + '/api/modules?publishedOnly=1');
+    const data = await res.json();
+    const all = data.modules || [];
+    const mods = all.filter(m => selectedIds.includes(m.id));
+
+    const card = el('div', { class: 'training-card' });
+    card.appendChild(el('div', { class: 'training-hero' }, [
+      el('h2', {}, [document.createTextNode('Welcome to training')]),
+      el('p', {}, [document.createTextNode('Work through the modules below. You can return home anytime.')])
+    ]));
+
+    const grid = el('div', { class: 'training-grid cols-2' },
+      mods.map(m => {
+        const pct = getProgressPct(m);
+        const done = pct >= 100;
+        const c = el('div', { class: 'module-card' + (done ? ' completed' : '') }, [
+          el('div', { class:'title' }, [document.createTextNode(m.title)]),
+          el('div', { class:'muted' }, [document.createTextNode(m.description || '')]),
+          el('div', { class:'progress-wrap' }, [
+            el('div', { class:'progress-chip' }, [document.createTextNode(done ? 'Completed' : `Progress ${pct}%`)]),
+            (function(){
+              const bar = el('div', { class:'progress-bar' }, el('div', { style:`width:${pct}%` }));
+              return bar;
+            })()
+          ]),
+          el('div', {}, [
+            el('button', { class:'btn primary' }, [document.createTextNode(done ? 'Review' : 'Begin')])
+          ])
+        ]);
+        c.querySelector('button').addEventListener('click', () => startSlides(m));
+        return c;
+      })
+    );
+
+    const actions = el('div', { class:'training-actions' }, [
+      el('button', { class:'btn ghost', id:'reset-session' }, [document.createTextNode('Reset Session')])
+    ]);
+
+    actions.querySelector('#reset-session').addEventListener('click', () => {
+      if (!confirm('Reset selected modules & progress for this session?')) return;
+      // Clear per-module local progress and session selection
+      mods.forEach(m => localStorage.removeItem('training_progress::' + m.id));
+      clearSession();
+      renderManagerGate();
+    });
+
+    card.appendChild(grid);
+    card.appendChild(actions);
+    root.appendChild(card);
+  }
+
+
+
   // UI helpers
   function ProgressBar(total, current) {
     const pct = total > 0 ? Math.round((current/total)*100) : 0;
@@ -83,10 +241,18 @@
     const slide = module.slides[idx];
     root.innerHTML = '';
 
-    const header = el('div', { class: 'training-header' }, [
-      el('div', { class: 'training-title' }, [document.createTextNode(module.title)]),
-      el('div', { class: 'muted' }, [document.createTextNode('Slide '+(idx+1)+' of '+ module.slides.length)])
-    ]);
+    const homeBtn = el('button', { class:'btn ghost', id:'home-btn' }, [document.createTextNode('Home')]);
+homeBtn.addEventListener('click', () => {
+  const sess = getSession();
+  if (sess?.selected?.length) return renderTraineeWelcome(sess.selected);
+  // Fallback to module list if no session
+  init(true);
+});
+const header = el('div', { class: 'training-header' }, [
+  el('div', { class: 'training-title' }, [document.createTextNode(module.title)]),
+  el('div', {}, [homeBtn])
+]);
+
     const progress = ProgressBar(module.slides.length, idx+1);
 
     const body = el('div', { class: 'training-body' });
@@ -264,4 +430,19 @@
 
   // Start
   init();
+    async function init(forceList=false) {
+    // If a specific moduleId was provided, jump straight to it (backwards compatible)
+    if (moduleId && !forceList) {
+      await loadModule(moduleId, accessCodeInitial || '');
+      return;
+    }
+    // New flow: manager gate → picker → trainee home
+    const sess = getSession();
+    if (!sess || !Array.isArray(sess.selected) || !sess.selected.length) {
+      renderManagerGate();
+    } else {
+      renderTraineeWelcome(sess.selected);
+    }
+  }
+
 })();

@@ -55,4 +55,23 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
 .module-card .title { font-weight: 600; }
 .module-card .muted { color: #6b7280; }
 
+/* Manager/Trainee screens */
+.training-hero { text-align:center; padding: 24px 12px; }
+.training-hero h2 { margin: 0 0 8px; }
+.training-hero p { margin: 0 0 16px; color: #64748b; }
+
+/* Progress chip in module cards */
+.progress-wrap { display:flex; align-items:center; gap:8px; }
+.progress-chip {
+  font-size: 12px; color: #334155;
+  border: 1px solid #cbd5e1; padding: 2px 8px; border-radius: 9999px;
+}
+.progress-bar { width: 100%; height: 6px; background: #f1f5f9; border-radius: 9999px; overflow:hidden; }
+.progress-bar > div { height: 100%; width: 0%; }
+
+/* States */
+.module-card.selected { border-color: #0ea5e9; background:#f0f9ff; }
+.module-card.completed { border-color: #16a34a; background:#ecfdf5; }
+
+
 @media (max-width: 720px) { .training-grid.cols-2 { grid-template-columns: 1fr; } }
