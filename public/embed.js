@@ -2,7 +2,6 @@
   // Create a shadow root to avoid theme CSS collisions
   // Get the current script and config
 const script = document.currentScript;
-console.log('[training] useShadow =', useShadow);
 const moduleId = script?.dataset?.module || "";
 const accessCodeInitial = script?.dataset?.access || "";
 const host = new URL(script.src).origin;
