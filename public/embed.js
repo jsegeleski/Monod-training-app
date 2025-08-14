@@ -227,9 +227,14 @@ card.appendChild(hero);
           el('div', { class: 'progress-bar' }, el('div', { style: `width:${pct}%` })),
           el('div', { class: 'progress-chip' }, [document.createTextNode(done ? 'Completed' : `${pct}%`)]),
         ]),
-        el('div', {}, [
-          el('button', { class: 'btn primary' }, [document.createTextNode(done ? 'Review' : 'Begin')]),
-        ]),
+        (() => {
+  const started = hasStarted(m);
+  const label = done ? 'Review' : (started ? 'Continue' : 'Begin');
+  return el('div', {}, [
+    el('button', { class: 'btn primary', 'data-id': m.id }, [document.createTextNode(label)])
+  ]);
+})()
+,
       ]);
 
       c.querySelector('button').addEventListener('click', () => startSlides(m));
@@ -319,6 +324,10 @@ function sanitizeModule(mod) {
   return { ...mod, slides };
 }
 
+function hasStarted(mod) {
+  const p = loadProgress(mod.id);
+  return p && Number.isFinite(Number(p.idx));
+}
 
   function renderModuleList(modules) {
     root.innerHTML = '';

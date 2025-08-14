@@ -35,7 +35,6 @@
 /* Hover effect */
 .btn:hover {
   background-color: #333;
-  transform: translateY(-2px);
 }
 
 /* Ghost / outline button */
