@@ -1,6 +1,7 @@
 (function(){
   // Create a shadow root to avoid theme CSS collisions
   const script = document.currentScript;
+  const heroBg = script?.dataset?.bg || script?.dataset?.hero || "";
   const moduleId = script?.dataset?.module || "";
   const accessCodeInitial = script?.dataset?.access || "";
   const host = new URL(script.src).origin;
@@ -94,7 +95,7 @@ function isCompleted(mod) {
         el('p', {}, [document.createTextNode('Manager access required to start a session.')])
       ]),
       el('div', { class: 'training-body' }, [
-        el('input', { type:'password', class:'btn', id:'mgr-pass', placeholder:'Manager password' }),
+        el('input', { type:'password', class:'input', id:'mgr-pass', placeholder:'Manager password' }),
         el('div', { class: 'training-actions' }, [
           el('button', { class:'btn primary', id:'mgr-continue' }, [document.createTextNode('Continue')])
         ])
@@ -140,12 +141,7 @@ async function renderManagerPicker() {
 
   // Trainee name input
   const nameWrap = el('div', { class: 'training-body' }, [
-    el('input', {
-      type: 'text',
-      class: 'btn',
-      id: 'trainee-name',
-      placeholder: "Trainee's name (optional)"
-    })
+    el('input', { type:'text', class:'input', id:'trainee-name', placeholder:"Trainee's name (optional)" })
   ]);
   card.appendChild(nameWrap);
 
@@ -208,12 +204,15 @@ async function renderManagerPicker() {
   const card = el('div', { class: 'training-card' });
 
   // Hero
-  card.appendChild(
-    el('div', { class: 'training-hero' }, [
-      el('h2', {}, [document.createTextNode(`Welcome to training${nameSuffix}`)]),
-      el('p', {}, [document.createTextNode('Work through the modules below. You can return home anytime.')]),
-    ])
-  );
+  const hero = el('div', {
+  class: 'training-hero' + (heroBg ? ' banner' : ''),
+  style: heroBg ? `background-image:url('${heroBg}')` : ''
+}, [
+  el('h2', {}, [document.createTextNode(`Welcome to training${nameSuffix}`)]),
+  el('p', {}, [document.createTextNode('Work through the modules below. You can return home anytime.')])
+]);
+card.appendChild(hero);
+
 
   // Grid of selected modules with compact progress UI
   const grid = el('div', { class: 'training-grid cols-2' },
@@ -343,8 +342,11 @@ async function renderManagerPicker() {
     // CONTENT SLIDE
     if (slide?.type === 'content') {
       if (slide.imageUrl) body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' }));
-      body.appendChild(el('h3', {}, [document.createTextNode(slide.title || '')] ));
-      body.appendChild(el('div', { html: slide.bodyHtml || '' }));
+      // Optional little "Quiz" chip
+body.appendChild(el('div', { class: 'quiz-label' }, [document.createTextNode('Quiz')]));
+// Make the QUESTION the prominent heading
+body.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 'Question')]));
+
 
       card.appendChild(header);
       card.appendChild(progress);
