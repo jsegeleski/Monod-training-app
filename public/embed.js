@@ -1,7 +1,7 @@
 (function(){
   // Create a shadow root to avoid theme CSS collisions
   const script = document.currentScript;
-  const heroBg = script?.dataset?.bg || script?.dataset?.hero || "";
+  const heroBg = (script?.dataset?.bg || script?.dataset?.hero || '').trim();
   const moduleId = script?.dataset?.module || "";
   const accessCodeInitial = script?.dataset?.access || "";
   const host = new URL(script.src).origin;
@@ -94,7 +94,7 @@ function isCompleted(mod) {
         el('h2', {}, [document.createTextNode('Staff Training')]),
         el('p', {}, [document.createTextNode('Manager access required to start a session.')])
       ]),
-      el('div', { class: 'training-body' }, [
+      el('div', { class: 'training-body center' }, [
         el('input', { type:'password', class:'input', id:'mgr-pass', placeholder:'Manager password' }),
         el('div', { class: 'training-actions' }, [
           el('button', { class:'btn primary', id:'mgr-continue' }, [document.createTextNode('Continue')])
@@ -140,9 +140,10 @@ async function renderManagerPicker() {
   );
 
   // Trainee name input
-  const nameWrap = el('div', { class: 'training-body' }, [
-    el('input', { type:'text', class:'input', id:'trainee-name', placeholder:"Trainee's name (optional)" })
-  ]);
+  const nameWrap = el('div', { class: 'training-body center' }, [
+  el('input', { type:'text', class:'input', id:'trainee-name', placeholder:"Trainee's name (optional)" })
+]);
+
   card.appendChild(nameWrap);
 
   // Module grid (click to toggle)
@@ -159,7 +160,7 @@ async function renderManagerPicker() {
   card.appendChild(grid);
 
   // Actions
-  const actions = el('div', { class: 'training-actions' }, [
+  const actions = el('div', { class: 'training-actions', style: 'justify-content:center' }, [
     el('button', { class: 'btn ghost', id: 'cancel' }, [document.createTextNode('Back')]),
     el('button', { class: 'btn primary', id: 'start' }, [document.createTextNode('Start Session')]),
   ]);
@@ -212,7 +213,6 @@ async function renderManagerPicker() {
   el('p', {}, [document.createTextNode('Work through the modules below. You can return home anytime.')])
 ]);
 card.appendChild(hero);
-
 
   // Grid of selected modules with compact progress UI
   const grid = el('div', { class: 'training-grid cols-2' },
@@ -275,11 +275,14 @@ card.appendChild(hero);
 
 
   // UI helpers
+  if (typeof ProgressBar !== 'function') {
+  // Fallback ProgressBar (in case it was moved/renamed)
   function ProgressBar(total, current) {
-    const pct = total > 0 ? Math.round((current/total)*100) : 0;
-    const wrap = el('div', { class: 'training-progress' }, el('div', { style: 'width:'+pct+'%' }));
-    return wrap;
+    const pct = total ? Math.round((current / total) * 100) : 0;
+    return el('div', { class: 'training-progress' }, el('div', { style: 'width:' + pct + '%' }));
   }
+}
+
 
   function renderModuleList(modules) {
     root.innerHTML = '';

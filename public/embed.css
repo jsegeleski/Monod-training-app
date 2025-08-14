@@ -151,6 +151,12 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
   padding: 2px 8px; border-radius: 9999px; text-transform: uppercase;
 }
 
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* center horizontally */
+  gap: 12px;
+}
 
 
 @media (max-width: 720px) { .training-grid.cols-2 { grid-template-columns: 1fr; } }
