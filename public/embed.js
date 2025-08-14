@@ -562,6 +562,11 @@ function startSlides(mod) {
     let lastCheckpoint = 0;
     const progress = loadProgress(safeMod.id);
     let idx = progress ? Number(progress.idx) : 0;
+    // Mark as started if this is the first open
+if (!progress) {
+  try { saveProgress(mod.id || safeMod.id, idx); } catch {}
+}
+
     if (!Number.isFinite(idx)) idx = 0;
 
     if (idx > 0) {
