@@ -68,15 +68,23 @@
 
   // Per-module progress (0-100)
   function getProgressPct(mod) {
-    const p = loadProgress(mod.id);
-    if (!mod?.slides?.length) return 0;
-    const idx = Math.max(0, (p?.idx ?? 0));
-    const pct = Math.round(((idx+1) / mod.slides.length) * 100);
-    return Math.min(100, Math.max(0, pct));
-  }
-  function isCompleted(mod) {
-    return getProgressPct(mod) >= 100;
-  }
+  if (!mod?.slides?.length) return 0;
+
+  const p = loadProgress(mod.id);          // <- returns null if nothing saved
+  if (!p) return 0;                         // <- show 0% if no stored progress
+
+  const idx = Math.max(0, Number(p.idx || 0));
+  const pct = Math.round(((idx + 1) / mod.slides.length) * 100);
+  return Math.min(100, Math.max(0, pct));
+}
+
+function isCompleted(mod) {
+  const p = loadProgress(mod.id);
+  if (!p) return false;                     // no record -> not completed
+  const lastIndex = (mod?.slides?.length || 1) - 1;
+  return Number(p.idx) >= lastIndex;
+}
+
 
     function renderManagerGate() {
     root.innerHTML = '';
