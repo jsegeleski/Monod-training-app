@@ -1,45 +1,49 @@
-import { readFileSync, writeFileSync } from 'fs';
-import path from 'path';
+// pages/api/modules/[id].js
+import dbmod from '../../../lib/db'; // CJS -> import default
+const { readDB, writeDB } = dbmod;
 
-const DB_PATH = path.join(process.cwd(), 'data', 'db.json');
-const loadDB = () => JSON.parse(readFileSync(DB_PATH, 'utf8'));
-const saveDB = (db) => writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-
-function setCORS(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,DELETE,OPTIONS,HEAD');
+function applyCORS(req, res) {
+  const origin = req.headers.origin;
+  const allowed = [process.env.STOREFRONT_ORIGIN, process.env.LOCAL_ORIGIN].filter(Boolean);
+  if (allowed.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PATCH, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-export default function handler(req, res) {
-  setCORS(res);
-
+export default async function handler(req, res) {
+  applyCORS(req, res);
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'HEAD')  return res.status(200).end();
 
   const { id } = req.query;
-  const db = loadDB();
-  const idx = db.modules.findIndex(m => m.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Not found' });
+  const db = await readDB();
+  const modules = db.modules || [];
+  const idx = modules.findIndex(m => m.id === id);
+  const found = idx >= 0 ? modules[idx] : null;
 
   if (req.method === 'GET') {
-    const { publishedOnly } = req.query;
-    const mod = db.modules[idx];
-    if (publishedOnly && !mod.isPublished) return res.status(404).json({ error: 'Not found' });
-    return res.status(200).json({ module: mod });
+    if (!found) return res.status(404).json({ error: 'Not found' });
+    return res.status(200).json({ module: found });
   }
 
-  if (req.method === 'PUT') {
-    const { module } = req.body || {};
-    if (!module || module.id !== id) return res.status(400).json({ error: 'Invalid payload' });
-    db.modules[idx] = module;
-    saveDB(db);
-    return res.status(200).json({ module });
+  if (req.method === 'PATCH' || req.method === 'PUT') {
+    if (!found) return res.status(404).json({ error: 'Not found' });
+    const patch = req.body || {};
+    const updated = { ...found, ...patch, updatedAt: new Date().toISOString() };
+    const next = { ...db, modules: modules.map(m => (m.id === id ? updated : m)) };
+    await writeDB(next);
+    return res.status(200).json({ module: updated });
   }
 
   if (req.method === 'DELETE') {
-    db.modules.splice(idx, 1);
-    saveDB(db);
+    if (!found) return res.status(404).json({ error: 'Not found' });
+    const next = { ...db, modules: modules.filter(m => m.id !== id) };
+    await writeDB(next);
     return res.status(200).json({ ok: true });
   }
 
