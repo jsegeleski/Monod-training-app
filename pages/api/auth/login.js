@@ -7,17 +7,23 @@ function setCORS(res) {
 }
 
 export default function handler(req, res) {
-  setCORS(res);
-
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'HEAD')    return res.status(200).end();
-  if (req.method !== 'POST')    return res.status(405).end();
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
+  }
+  if (req.method !== 'POST') return res.status(405).end();
 
   const { password } = req.body || {};
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ ok: false });
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ ok: false, error: 'Invalid password' });
   }
-  // Cookie is fine to set; third‑party cookie may be ignored in Shopify, but we only need the 200
-  setCookie(res, 'admin_auth', 'true', 2);
-  res.json({ ok: true });
+
+  // Set a same-origin cookie for admin
+  res.setHeader(
+    'Set-Cookie',
+    `admin_auth=true; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 8}`
+  );
+  return res.status(200).json({ ok: true });
 }
+
