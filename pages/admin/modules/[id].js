@@ -1,6 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../../components/admin/AdminLayout';
+
+// pick only draft fields (what we autosave)
+function draftFrom(m) {
+  return {
+    title: m?.title || '',
+    description: m?.description || '',
+    accessCode: m?.accessCode || '',
+    slides: Array.isArray(m?.slides) ? m.slides : [],
+  };
+}
+
+async function patchModule(id, payload) {
+  const r = await fetch(`/api/modules/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    // credentials: 'include', // uncomment if admin runs on a different origin
+    body: JSON.stringify(payload),
+  });
+  if (!r.ok) throw new Error(await r.text());
+  const { module } = await r.json();
+  return module;
+}
 
 export default function ModuleEditor() {
   const router = useRouter();
@@ -9,6 +31,8 @@ export default function ModuleEditor() {
   const [mod, setMod] = useState(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  const [autoMsg, setAutoMsg] = useState('');
+  const saveTimer = useRef(null);
 
   useEffect(() => { if (id) load(); }, [id]);
 
@@ -47,44 +71,63 @@ export default function ModuleEditor() {
     });
   }
 
+  // manual save (button). accepts field overrides for exact control.
   async function save(overrides = {}) {
-  setBusy(true);
-  setMsg('');
-
-  const payload = {
-    title: mod.title,
-    description: mod.description,
-    accessCode: mod.accessCode,
-    isPublished: !!mod.isPublished,
-    slides: Array.isArray(mod.slides) ? mod.slides : [],
-    ...overrides, // <- force specific fields (like isPublished) to what we intend
-  };
-
-  const r = await fetch(`/api/modules/${mod.id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-
-  setBusy(false);
-
-  if (r.ok) {
-    const { module: saved } = await r.json();
-    setMod(saved);
-    setMsg('Saved');
-  } else {
-    setMsg('Save failed');
+    if (!mod) return;
+    setBusy(true);
+    setMsg('');
+    try {
+      const payload = { ...draftFrom(mod), isPublished: !!mod.isPublished, ...overrides };
+      const saved = await patchModule(mod.id, payload);
+      setMod(saved);
+      setMsg('Saved');
+    } catch (e) {
+      console.error(e);
+      setMsg('Save failed');
+    } finally {
+      setBusy(false);
+      setTimeout(() => setMsg(''), 1200);
+    }
   }
-}
 
+  // auto-save drafts (debounced ~1s) for title/description/accessCode/slides
+  const draftKey = useMemo(() => JSON.stringify(mod ? draftFrom(mod) : null), [mod]);
+  useEffect(() => {
+    if (!mod) return;
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(async () => {
+      try {
+        const saved = await patchModule(mod.id, draftFrom(mod));
+        setMod(saved);
+        setAutoMsg('Saved');
+        setTimeout(() => setAutoMsg(''), 1000);
+      } catch (e) {
+        console.error('Autosave failed', e);
+        setAutoMsg('Autosave failed');
+        setTimeout(() => setAutoMsg(''), 1500);
+      }
+    }, 1000);
+    return () => clearTimeout(saveTimer.current);
+  }, [draftKey, mod?.id]);
 
-
+  // instant publish toggle (optimistic + rollback)
   async function togglePublish() {
-  const next = !mod.isPublished;
-  setField('isPublished', next);     // optimistic UI
-  await save({ isPublished: next }); // ensure server gets the same value
-}
-
+    if (!mod) return;
+    const next = !mod.isPublished;
+    setMod(m => ({ ...m, isPublished: next })); // optimistic
+    try {
+      const saved = await patchModule(mod.id, { isPublished: next });
+      setMod(saved);
+      setMsg(next ? 'Published' : 'Unpublished');
+      setTimeout(() => setMsg(''), 1000);
+    } catch (e) {
+      console.error(e);
+      // rollback
+      setMod(m => ({ ...m, isPublished: !next }));
+      setMsg('Publish failed');
+      setTimeout(() => setMsg(''), 1500);
+    }
+  }
 
   async function destroy() {
     if (!confirm('Delete entire module?')) return;
@@ -93,6 +136,7 @@ export default function ModuleEditor() {
   }
 
   if (!mod) return <AdminLayout title="Loading…"><div className="card">Loading…</div></AdminLayout>;
+
 
   return (
     <AdminLayout title={`Edit: ${mod.title || 'Untitled'}`}>
