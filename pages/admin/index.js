@@ -68,118 +68,63 @@ export default function AdminHome() {
   return (
     <AdminLayout title="Modules">
       <div className="card">
-  <h2 style={{ margin: 0 }}>Slides</h2>
-
-  <div className="slide-list" style={{ marginTop: 8 }}>
-    {(mod.slides || []).map((s, i) => (
-      <div key={s.id || i} className="slide-item">
-        <div className="slide-head">
-          <div className="slide-type">#{i + 1} • {s.type === 'quiz' ? 'Quiz' : 'Content'}</div>
-          <div className="slide-actions">
-            <button className="abtn" onClick={() => moveSlide(i, -1)}>↑</button>
-            <button className="abtn" onClick={() => moveSlide(i, 1)}>↓</button>
-            <button className="abtn danger" onClick={() => deleteSlide(i)}>Delete</button>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h2 style={{ margin: 0 }}>Modules</h2>
+          <button className="abtn primary" onClick={create} disabled={busy}>
+            {busy ? 'Creating…' : 'New Module'}
+          </button>
         </div>
 
-        {s.type === 'content' ? (
-          // ===== CONTENT SLIDE: Full-width fields, URL under Title, Body below =====
-          <div style={{ marginTop: 8 }}>
-            <div className="row">
-              <div className="label">Title</div>
-              <input
-                className="input"
-                style={{ width: '100%' }}
-                value={s.title || ''}
-                onChange={e => updateSlide(mod, setMod, i, { title: e.target.value })}
-              />
-            </div>
-
-            <div className="row">
-              <div className="label">Image URL</div>
-              <input
-                className="input"
-                style={{ width: '100%' }}
-                value={s.imageUrl || ''}
-                onChange={e => updateSlide(mod, setMod, i, { imageUrl: e.target.value })}
-                placeholder="Paste an image URL (Shopify Files or CDN). Leave blank if not needed."
-              />
-            </div>
-
-            <div className="row">
-              <div className="label">Body (HTML OK)</div>
-              <textarea
-                className="textarea"
-                style={{ width: '100%', minHeight: 220 }}
-                value={s.bodyHtml || ''}
-                onChange={e => updateSlide(mod, setMod, i, { bodyHtml: e.target.value })}
-              />
-            </div>
-          </div>
-        ) : (
-          // ===== QUIZ SLIDE (unchanged layout) =====
-          <div className="split" style={{ marginTop: 8 }}>
-            <div>
-              <div className="row">
-                <div className="label">Question</div>
-                <input
-                  className="input"
-                  value={s.question?.text || ''}
-                  onChange={e => {
-                    const q = { ...(s.question || {}), text: e.target.value };
-                    updateSlide(mod, setMod, i, { question: q });
-                  }}
-                />
-              </div>
-              <div className="row">
-                <div className="label">Title (optional)</div>
-                <input
-                  className="input"
-                  value={s.title || ''}
-                  onChange={e => updateSlide(mod, setMod, i, { title: e.target.value })}
-                />
-              </div>
-            </div>
-            <div>
-              <div className="row">
-                <div className="label">Image URL</div>
-                <input
-                  className="input"
-                  value={s.imageUrl || ''}
-                  onChange={e => updateSlide(mod, setMod, i, { imageUrl: e.target.value })}
-                />
-              </div>
-              <div className="help">Optional: add an image above the question.</div>
-            </div>
-
-            <div style={{ gridColumn: '1 / -1', marginTop: 8 }}>
-              <OptionsEditor
-                slide={s}
-                onChange={(opts) => {
-                  const q = { ...(s.question || {}), options: opts };
-                  updateSlide(mod, setMod, i, { question: q });
-                }}
-              />
-            </div>
-          </div>
-        )}
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Slides</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {!loading && mods.map(m => (
+              <tr key={m.id}>
+                <td>
+                  <a className="abtn ghost" href={`/admin/modules/${m.id}`} style={{ padding: '6px 10px' }}>
+                    {m.title || 'Untitled'}
+                  </a>
+                  
+                </td>
+                <td>{m.slides?.length || 0}</td>
+                <td>{m.isPublished ? <span className="badge ok">Published</span> : <span className="badge">Draft</span>}</td>
+                <td className="actions">
+                  <span className="actions-wrap">
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={!!m.isPublished}
+                        onChange={() => togglePublish(m)}
+                      />
+                      <span className="help">Published</span>
+                    </label>
+                    <a href={`/admin/modules/${m.id}`} className="abtn">Edit</a>
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {!loading && mods.length === 0 && (
+              <tr>
+                <td colSpan={4}>
+                  <div className="help">
+                    No modules yet. Click <span className="kbd">New Module</span> to get started.
+                  </div>
+                </td>
+              </tr>
+            )}
+            {loading && (
+              <tr><td colSpan={4}><div className="help">Loading…</div></td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
-    ))}
-
-    {(mod.slides || []).length === 0 && (
-      <div className="help">
-        No slides yet. Add a <span className="kbd">Content</span> slide or a <span className="kbd">Quiz</span> slide.
-      </div>
-    )}
-  </div>
-
-  {/* Moved here: always appears after the newest slide */}
-  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-    <button className="abtn" onClick={() => addSlide('content')}>+ Content</button>
-    <button className="abtn" onClick={() => addSlide('quiz')}>+ Quiz</button>
-  </div>
-</div>
-
     </AdminLayout>
   );
 }
