@@ -11,9 +11,9 @@ export default async function handler(req, res) {
   try {
     const file = path.join(process.cwd(), 'data', 'db.json');
     const obj = JSON.parse(fs.readFileSync(file, 'utf8'));
-    await writeDB(obj); // writes to KV in prod
-    return res.status(200).json({ ok: true, counts: { modules: obj.modules?.length || 0 } });
+    await writeDB(obj); // writes to Redis in prod
+    res.status(200).json({ ok: true, counts: { modules: obj.modules?.length || 0 } });
   } catch (e) {
-    return res.status(500).json({ error: String(e) });
+    res.status(500).json({ error: String(e) });
   }
 }
