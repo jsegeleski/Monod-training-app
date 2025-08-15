@@ -169,84 +169,118 @@ export default function ModuleEditor() {
       </div>
 
       <div className="card">
-        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8}}>
-          <h2 style={{margin:0}}>Slides</h2>
-          <div style={{display:'flex', gap:8}}>
-            <button className="abtn" onClick={()=>addSlide('content')}>+ Content</button>
-            <button className="abtn" onClick={()=>addSlide('quiz')}>+ Quiz</button>
+  <h2 style={{ margin: 0 }}>Slides</h2>
+
+  <div className="slide-list" style={{ marginTop: 8 }}>
+    {(mod.slides || []).map((s, i) => (
+      <div key={s.id || i} className="slide-item">
+        <div className="slide-head">
+          <div className="slide-type">#{i + 1} • {s.type === 'quiz' ? 'Quiz' : 'Content'}</div>
+          <div className="slide-actions">
+            <button className="abtn" onClick={() => moveSlide(i, -1)}>↑</button>
+            <button className="abtn" onClick={() => moveSlide(i, 1)}>↓</button>
+            <button className="abtn danger" onClick={() => deleteSlide(i)}>Delete</button>
           </div>
         </div>
 
-        <div className="slide-list">
-          {(mod.slides||[]).map((s, i) => (
-            <div key={s.id || i} className="slide-item">
-              <div className="slide-head">
-                <div className="slide-type">#{i+1} • {s.type === 'quiz' ? 'Quiz' : 'Content'}</div>
-                <div className="slide-actions">
-                  <button className="abtn" onClick={()=>moveSlide(i,-1)}>↑</button>
-                  <button className="abtn" onClick={()=>moveSlide(i, 1)}>↓</button>
-                  <button className="abtn danger" onClick={()=>deleteSlide(i)}>Delete</button>
-                </div>
-              </div>
-
-              {s.type === 'content' ? (
-                <div className="split" style={{marginTop:8}}>
-                  <div>
-                    <div className="row">
-                      <div className="label">Title</div>
-                      <input className="input" value={s.title || ''} onChange={e=>updateSlide(mod, setMod, i, { title: e.target.value })}/>
-                    </div>
-                    <div className="row">
-                      <div className="label">Body (HTML OK)</div>
-                      <textarea className="textarea" value={s.bodyHtml || ''} onChange={e=>updateSlide(mod, setMod, i, { bodyHtml: e.target.value })}/>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="row">
-                      <div className="label">Image URL</div>
-                      <input className="input" value={s.imageUrl || ''} onChange={e=>updateSlide(mod, setMod, i, { imageUrl: e.target.value })}/>
-                    </div>
-                    <div className="help">Paste an image URL (Shopify Files or CDN). Leave blank if not needed.</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="split" style={{marginTop:8}}>
-                  <div>
-                    <div className="row">
-                      <div className="label">Question</div>
-                      <input className="input" value={s.question?.text || ''} onChange={e=>{
-                        const q = { ...(s.question||{}), text: e.target.value };
-                        updateSlide(mod, setMod, i, { question: q });
-                      }}/>
-                    </div>
-                    <div className="row">
-                      <div className="label">Title (optional)</div>
-                      <input className="input" value={s.title || ''} onChange={e=>updateSlide(mod, setMod, i, { title: e.target.value })}/>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="row">
-                      <div className="label">Image URL</div>
-                      <input className="input" value={s.imageUrl || ''} onChange={e=>updateSlide(mod, setMod, i, { imageUrl: e.target.value })}/>
-                    </div>
-                    <div className="help">Optional: add an image above the question.</div>
-                  </div>
-
-                  <div style={{gridColumn:'1 / -1', marginTop:8}}>
-                    <OptionsEditor slide={s} onChange={(opts)=> {
-                      const q = { ...(s.question||{}), options: opts };
-                      updateSlide(mod, setMod, i, { question: q });
-                    }} />
-                  </div>
-                </div>
-              )}
+        {s.type === 'content' ? (
+          // ===== CONTENT SLIDE: Full-width fields, URL under Title, Body below =====
+          <div style={{ marginTop: 8 }}>
+            <div className="row">
+              <div className="label">Title</div>
+              <input
+                className="input"
+                style={{ width: '100%' }}
+                value={s.title || ''}
+                onChange={e => updateSlide(mod, setMod, i, { title: e.target.value })}
+              />
             </div>
-          ))}
-          {(mod.slides||[]).length === 0 && (
-            <div className="help">No slides yet. Add a <span className="kbd">Content</span> slide or a <span className="kbd">Quiz</span> slide.</div>
-          )}
-        </div>
+
+            <div className="row">
+              <div className="label">Image URL</div>
+              <input
+                className="input"
+                style={{ width: '100%' }}
+                value={s.imageUrl || ''}
+                onChange={e => updateSlide(mod, setMod, i, { imageUrl: e.target.value })}
+                placeholder="Paste an image URL (Shopify Files or CDN). Leave blank if not needed."
+              />
+            </div>
+
+            <div className="row">
+              <div className="label">Body (HTML OK)</div>
+              <textarea
+                className="textarea"
+                style={{ width: '100%', minHeight: 220 }}
+                value={s.bodyHtml || ''}
+                onChange={e => updateSlide(mod, setMod, i, { bodyHtml: e.target.value })}
+              />
+            </div>
+          </div>
+        ) : (
+          // ===== QUIZ SLIDE (unchanged layout) =====
+          <div className="split" style={{ marginTop: 8 }}>
+            <div>
+              <div className="row">
+                <div className="label">Question</div>
+                <input
+                  className="input"
+                  value={s.question?.text || ''}
+                  onChange={e => {
+                    const q = { ...(s.question || {}), text: e.target.value };
+                    updateSlide(mod, setMod, i, { question: q });
+                  }}
+                />
+              </div>
+              <div className="row">
+                <div className="label">Title (optional)</div>
+                <input
+                  className="input"
+                  value={s.title || ''}
+                  onChange={e => updateSlide(mod, setMod, i, { title: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <div className="row">
+                <div className="label">Image URL</div>
+                <input
+                  className="input"
+                  value={s.imageUrl || ''}
+                  onChange={e => updateSlide(mod, setMod, i, { imageUrl: e.target.value })}
+                />
+              </div>
+              <div className="help">Optional: add an image above the question.</div>
+            </div>
+
+            <div style={{ gridColumn: '1 / -1', marginTop: 8 }}>
+              <OptionsEditor
+                slide={s}
+                onChange={(opts) => {
+                  const q = { ...(s.question || {}), options: opts };
+                  updateSlide(mod, setMod, i, { question: q });
+                }}
+              />
+            </div>
+          </div>
+        )}
       </div>
+    ))}
+
+    {(mod.slides || []).length === 0 && (
+      <div className="help">
+        No slides yet. Add a <span className="kbd">Content</span> slide or a <span className="kbd">Quiz</span> slide.
+      </div>
+    )}
+  </div>
+
+  {/* Moved here: always appears after the newest slide */}
+  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+    <button className="abtn" onClick={() => addSlide('content')}>+ Content</button>
+    <button className="abtn" onClick={() => addSlide('quiz')}>+ Quiz</button>
+  </div>
+</div>
+
     </AdminLayout>
   );
 }
