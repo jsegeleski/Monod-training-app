@@ -47,27 +47,30 @@ export default function ModuleEditor() {
     });
   }
 
-  async function save() {
+  async function save(overrides = {}) {
   setBusy(true);
   setMsg('');
+
+  const payload = {
+    title: mod.title,
+    description: mod.description,
+    accessCode: mod.accessCode,
+    isPublished: !!mod.isPublished,
+    slides: Array.isArray(mod.slides) ? mod.slides : [],
+    ...overrides, // <- force specific fields (like isPublished) to what we intend
+  };
 
   const r = await fetch(`/api/modules/${mod.id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      title: mod.title,
-      description: mod.description,
-      accessCode: mod.accessCode,
-      isPublished: !!mod.isPublished,
-      slides: Array.isArray(mod.slides) ? mod.slides : [],
-    }),
+    body: JSON.stringify(payload),
   });
 
   setBusy(false);
 
   if (r.ok) {
     const { module: saved } = await r.json();
-    setMod(saved); // keep UI in sync with server
+    setMod(saved);
     setMsg('Saved');
   } else {
     setMsg('Save failed');
@@ -75,10 +78,13 @@ export default function ModuleEditor() {
 }
 
 
+
   async function togglePublish() {
-    setField('isPublished', !mod.isPublished);
-    setTimeout(save, 0);
-  }
+  const next = !mod.isPublished;
+  setField('isPublished', next);     // optimistic UI
+  await save({ isPublished: next }); // ensure server gets the same value
+}
+
 
   async function destroy() {
     if (!confirm('Delete entire module?')) return;
