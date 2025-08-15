@@ -431,7 +431,7 @@ function hasStarted(mod) {
       card.appendChild(progress);
 
       // Make QUESTION the prominent heading
-      body.appendChild(el('div', { class: 'quiz-label' }, [document.createTextNode('Quiz')]));
+     // body.appendChild(el('div', { class: 'quiz-label' }, [document.createTextNode('Quiz')]));
       body.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 'Question')]));
       if (slide.imageUrl) body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' }));
 
