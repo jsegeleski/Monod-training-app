@@ -119,4 +119,23 @@
 .slide-actions { display:flex; gap:6px; }
 .slide-actions .abtn { padding:6px 10px; border-radius: 8px; }
 .split { display:grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+
+.slides input[type="text"],
+.slides textarea {
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
+}
+
+.slides label {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.slides .field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 @media (max-width: 860px) { .row { grid-template-columns: 1fr; } .split { grid-template-columns: 1fr; } }
