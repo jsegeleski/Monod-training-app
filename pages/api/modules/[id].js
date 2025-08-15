@@ -2,20 +2,20 @@ import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 const DB_PATH = path.join(process.cwd(), 'data', 'db.json');
-function loadDB() { return JSON.parse(readFileSync(DB_PATH, 'utf8')); }
-function saveDB(db) { writeFileSync(DB_PATH, JSON.stringify(db, null, 2)); }
+const loadDB = () => JSON.parse(readFileSync(DB_PATH, 'utf8'));
+const saveDB = (db) => writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
 
-// ✨ Add CORS helper
-function allowCORS(req, res) {
+function setCORS(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,DELETE,OPTIONS,HEAD');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') { res.status(200).end(); return true; }
-  return false;
 }
 
 export default function handler(req, res) {
-  if (allowCORS(req, res)) return;
+  setCORS(res);
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method === 'HEAD')  return res.status(200).end();
 
   const { id } = req.query;
   const db = loadDB();
@@ -26,7 +26,7 @@ export default function handler(req, res) {
     const { publishedOnly } = req.query;
     const mod = db.modules[idx];
     if (publishedOnly && !mod.isPublished) return res.status(404).json({ error: 'Not found' });
-    return res.json({ module: mod });
+    return res.status(200).json({ module: mod });
   }
 
   if (req.method === 'PUT') {
@@ -34,14 +34,14 @@ export default function handler(req, res) {
     if (!module || module.id !== id) return res.status(400).json({ error: 'Invalid payload' });
     db.modules[idx] = module;
     saveDB(db);
-    return res.json({ module });
+    return res.status(200).json({ module });
   }
 
   if (req.method === 'DELETE') {
     db.modules.splice(idx, 1);
     saveDB(db);
-    return res.json({ ok: true });
+    return res.status(200).json({ ok: true });
   }
 
-  res.status(405).end();
+  return res.status(405).end();
 }

@@ -1,42 +1,75 @@
-import Link from 'next/link';
-import { requireAdmin } from '../../lib/adminGuard';
+import { useEffect, useState } from 'react';
+import AdminLayout from '../../components/admin/AdminLayout';
 
-export async function getServerSideProps(ctx) {
-  const guard = requireAdmin(ctx);
-  if (guard) return guard;
-  const base = process.env.APP_BASE_URL || 'http://localhost:3000';
-  const res = await fetch(`${base}/api/modules`);
-  const data = await res.json();
-  return { props: { modules: data.modules } };
-}
+export default function AdminHome() {
+  const [mods, setMods] = useState([]);
+  const [busy, setBusy] = useState(false);
 
-export default function AdminHome({ modules }) {
+  async function load() {
+    const r = await fetch('/api/modules');
+    const j = await r.json();
+    setMods(j.modules || []);
+  }
+  useEffect(() => { load(); }, []);
+
+  async function create() {
+    setBusy(true);
+    const r = await fetch('/api/modules', {
+      method: 'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ title:'New module', description:'', isPublished:false })
+    });
+    const j = await r.json();
+    setBusy(false);
+    window.location.href = `/admin/modules/${j.module.id}`;
+  }
+
+  async function togglePublish(m) {
+    const updated = { ...m, isPublished: !m.isPublished };
+    await fetch(`/api/modules/${m.id}`, {
+      method: 'PUT',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ module: updated })
+    });
+    await load();
+  }
+
   return (
-    <div className="container">
+    <AdminLayout title="Modules">
       <div className="card">
-        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-          <h1>Training Admin</h1>
-          <Link className="btn primary" href="/admin/modules/new">+ New Module</Link>
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12}}>
+          <h2 style={{margin:0}}>Modules</h2>
+          <button className="abtn primary" onClick={create} disabled={busy}>{busy ? 'Creating…' : 'New Module'}</button>
         </div>
-        <table className="table" style={{marginTop:12}}>
-          <thead><tr><th>Title</th><th>Description</th><th>Published</th><th>Slides</th><th>Actions</th></tr></thead>
+
+        <table className="table">
+          <thead>
+            <tr><th>Title</th><th>Slides</th><th>Status</th><th>Actions</th></tr>
+          </thead>
           <tbody>
-            {modules.map(m => (
+            {mods.map(m => (
               <tr key={m.id}>
-                <td>{m.title}</td>
-                <td><small className="muted">{m.description}</small></td>
-                <td>{m.isPublished ? 'Yes' : 'No'}</td>
-                <td>{m.slides?.length || 0}</td>
                 <td>
-                  <Link className="btn" href={`/admin/modules/${m.id}`}>Edit</Link>
+                  <a className="abtn ghost" href={`/admin/modules/${m.id}`} style={{padding:'6px 10px'}}>{m.title || 'Untitled'}</a>
+                  <div className="help">{m.description}</div>
+                </td>
+                <td>{m.slides?.length || 0}</td>
+                <td>{m.isPublished ? <span className="badge ok">Published</span> : <span className="badge">Draft</span>}</td>
+                <td style={{display:'flex', gap:8}}>
+                  <label className="switch">
+                    <input type="checkbox" checked={!!m.isPublished} onChange={()=>togglePublish(m)} />
+                    <span className="help">Published</span>
+                  </label>
+                  <a href={`/admin/modules/${m.id}`} className="abtn">Edit</a>
                 </td>
               </tr>
             ))}
+            {mods.length === 0 && (
+              <tr><td colSpan={4}><div className="help">No modules yet. Click <span className="kbd">New Module</span> to get started.</div></td></tr>
+            )}
           </tbody>
         </table>
-        <hr className="sep" />
-        <small className="muted">Embed on Shopify with <code>&lt;script src=\"/embed.js\"&gt;</code> — see README.</small>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
