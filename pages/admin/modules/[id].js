@@ -207,7 +207,6 @@ function OptionsEditor({ slide, onChange }) {
     onChange(opts.filter((_,idx)=> idx!==i));
   }
   function markCorrect(i) {
-    // single-correct radio behavior
     onChange(opts.map((o, idx) => ({ ...o, isCorrect: idx===i })));
   }
 
@@ -215,30 +214,48 @@ function OptionsEditor({ slide, onChange }) {
     <div className="card" style={{background:'#0f1620', borderStyle:'solid'}}>
       <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6}}>
         <div className="label" style={{textTransform:'uppercase'}}>Options</div>
-        <button className="abtn" onClick={addOpt}>+ Add option</button>
+        <button className="abtn" type="button" onClick={addOpt}>+ Add option</button>
       </div>
 
       <div className="slide-list">
-        {opts.map((o, i) => (
-          <div key={o.id || i} className="slide-item" style={{borderStyle:'solid'}}>
-            <div className="row">
-              <div className="label">Text</div>
-              <input className="input" value={o.text || ''} onChange={e=>setOpt(i, { text: e.target.value })}/>
+        {opts.map((o, i) => {
+          const isCorrect = !!o.isCorrect;
+          return (
+            <div key={o.id || i} className={'opt-row' + (isCorrect ? ' correct' : '')}>
+              <input
+                className="input"
+                placeholder={`Option ${i+1} text`}
+                value={o.text || ''}
+                onChange={e=>setOpt(i, { text: e.target.value })}
+              />
+
+              <button
+                type="button"
+                className="abtn"
+                onClick={()=>markCorrect(i)}
+                title="Mark as correct"
+              >
+                {isCorrect ? '✓ Correct' : 'Mark correct'}
+              </button>
+
+              <button
+                type="button"
+                className="abtn danger"
+                onClick={()=>delOpt(i)}
+                title="Remove option"
+              >
+                Remove
+              </button>
+
+              {/* subtle badge for clarity */}
+              {isCorrect ? <div className="correct-pill" style={{gridColumn:'1 / -1'}}>This is the correct answer</div> : null}
             </div>
-            <div className="row">
-              <div className="label">Correct</div>
-              <label className="switch">
-                <input type="checkbox" checked={!!o.isCorrect} onChange={()=>markCorrect(i)} />
-                <span className="help">Exactly one should be correct</span>
-              </label>
-            </div>
-            <div style={{display:'flex', justifyContent:'flex-end'}}>
-              <button className="abtn danger" onClick={()=>delOpt(i)}>Remove</button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
+
         {opts.length === 0 && <div className="help">No options yet.</div>}
       </div>
     </div>
   );
 }
+

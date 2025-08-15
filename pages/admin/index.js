@@ -13,16 +13,26 @@ export default function AdminHome() {
   useEffect(() => { load(); }, []);
 
   async function create() {
-    setBusy(true);
+  setBusy(true);
+  try {
     const r = await fetch('/api/modules', {
       method: 'POST',
       headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ title:'New module', description:'', isPublished:false })
     });
+    if (!r.ok) {
+      const t = await r.text();
+      throw new Error('Create failed: ' + t);
+    }
     const j = await r.json();
-    setBusy(false);
+    if (!j?.module?.id) throw new Error('Create failed: no id in response');
     window.location.href = `/admin/modules/${j.module.id}`;
+  } catch (e) {
+    alert(e.message || 'Create failed');
+    setBusy(false);
   }
+}
+
 
   async function togglePublish(m) {
     const updated = { ...m, isPublished: !m.isPublished };
@@ -55,13 +65,16 @@ export default function AdminHome() {
                 </td>
                 <td>{m.slides?.length || 0}</td>
                 <td>{m.isPublished ? <span className="badge ok">Published</span> : <span className="badge">Draft</span>}</td>
-                <td style={{display:'flex', gap:8}}>
-                  <label className="switch">
-                    <input type="checkbox" checked={!!m.isPublished} onChange={()=>togglePublish(m)} />
-                    <span className="help">Published</span>
-                  </label>
-                  <a href={`/admin/modules/${m.id}`} className="abtn">Edit</a>
-                </td>
+                <td className="actions">
+  <span className="actions-wrap">
+    <label className="switch">
+      <input type="checkbox" checked={!!m.isPublished} onChange={()=>togglePublish(m)} />
+      <span className="help">Published</span>
+    </label>
+    <a href={`/admin/modules/${m.id}`} className="abtn">Edit</a>
+  </span>
+</td>
+
               </tr>
             ))}
             {mods.length === 0 && (

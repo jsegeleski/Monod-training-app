@@ -58,7 +58,11 @@
   width:100%; padding:10px 12px; border-radius: 10px;
   border:1px solid var(--border); background:#0f1620; color:var(--text);
 }
-.textarea { min-height: 110px; }
+.textarea {
+  min-height: 220px;
+  line-height: 1.6;
+  font-size: 14px;
+}
 .help { color: var(--muted); font-size: 12px; }
 .switch { display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
 .switch input { appearance:none; width:40px; height:22px; border-radius:9999px; background:#213141; position:relative; outline:none; border:1px solid var(--border); }
@@ -73,6 +77,39 @@
 .kbd { background: var(--chip); padding:2px 8px; border-radius:9999px; border:1px solid var(--border); font-size:12px; }
 .badge { background:#0e1a25; border:1px solid #213141; color:#a3b7cc; padding:2px 8px; border-radius:9999px; font-size:12px; }
 .badge.ok { background:#05251a; border-color:#0a3a2a; color:#a9e7cf; }
+
+/* Better row alignment */
+.table td, .table th { vertical-align: middle; }
+
+/* Keep actions neatly aligned and on one line */
+.table td.actions { white-space: nowrap; }
+.table td.actions .actions-wrap {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Quiz option rows */
+.opt-row {
+  display: grid;
+  grid-template-columns: 1fr 140px 90px;
+  gap: 10px;
+  align-items: center;
+  background: #0f1620;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+}
+.opt-row.correct {
+  background: #05251a;
+  border-color: #0a3a2a;
+}
+.opt-row .correct-pill {
+  display:inline-flex; align-items:center; justify-content:center;
+  padding: 4px 10px; border-radius:9999px;
+  background:#05251a; color:#a9e7cf; border:1px solid #0a3a2a; font-size:12px; font-weight:700;
+}
+
 
 /* Slide editor */
 .slide-list { display:grid; gap:8px; }
