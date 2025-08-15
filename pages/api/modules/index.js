@@ -1,40 +1,62 @@
-import { readFileSync, writeFileSync } from 'fs';
-import path from 'path';
-import { nanoid } from '../../../lib/db';
+// pages/api/modules/index.js (CommonJS to match lib/db.js)
+const { readDB, writeDB, nanoid } = require('../../../lib/db');
 
-const DB_PATH = path.join(process.cwd(), 'data', 'db.json');
-const loadDB = () => JSON.parse(readFileSync(DB_PATH, 'utf8'));
-const saveDB = (db) => writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+function applyCORS(req, res) {
+  const origin = req.headers.origin;
+  const allowed = [
+    process.env.STOREFRONT_ORIGIN,  // e.g. https://www.monodsports.com
+    process.env.LOCAL_ORIGIN        // e.g. http://localhost:3000
+  ].filter(Boolean);
 
-function setCORS(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,HEAD');
+  if (allowed.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  } else {
+    // fallback for same-origin calls
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-export default function handler(req, res) {
-  setCORS(res);
-
+module.exports = async function handler(req, res) {
+  applyCORS(req, res);
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method === 'HEAD')  return res.status(200).end();
-
-  const db = loadDB();
 
   if (req.method === 'GET') {
-    const { publishedOnly } = req.query;
-    let modules = db.modules;
-    if (publishedOnly) modules = modules.filter(m => m.isPublished);
+    const db = await readDB();
+    let modules = db.modules || [];
+    if (req.query.publishedOnly) modules = modules.filter(m => m.isPublished);
     return res.status(200).json({ modules });
   }
 
   if (req.method === 'POST') {
-    const { title, description, isPublished, accessCode } = req.body || {};
-    const id = 'mod_' + nanoid(8);
-    const mod = { id, title: title || 'Untitled', description: description || '', isPublished: !!isPublished, accessCode: accessCode || '', slides: [] };
-    db.modules.push(mod);
-    saveDB(db);
-    return res.status(201).json({ module: mod });
+    try {
+      const body = req.body || {};
+      const db = await readDB();
+      const id = 'mod_' + nanoid(8);
+      const now = new Date().toISOString();
+
+      const mod = {
+        id,
+        title: body.title || 'Untitled',
+        description: body.description || '',
+        isPublished: !!body.isPublished,
+        accessCode: body.accessCode || '',
+        slides: [],
+        createdAt: now,
+        updatedAt: now
+      };
+
+      const next = { ...db, modules: [mod, ...(db.modules || [])] };
+      await writeDB(next);
+      return res.status(201).json({ module: mod });
+    } catch (e) {
+      return res.status(500).json({ error: String(e) });
+    }
   }
 
   return res.status(405).end();
-}
+};
