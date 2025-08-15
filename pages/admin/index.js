@@ -91,7 +91,7 @@ export default function AdminHome() {
                   <a className="abtn ghost" href={`/admin/modules/${m.id}`} style={{ padding: '6px 10px' }}>
                     {m.title || 'Untitled'}
                   </a>
-                  <div className="help">{m.description}</div>
+                  
                 </td>
                 <td>{m.slides?.length || 0}</td>
                 <td>{m.isPublished ? <span className="badge ok">Published</span> : <span className="badge">Draft</span>}</td>
