@@ -1,27 +1,22 @@
-// pages/api/modules/index.js (CommonJS to match lib/db.js)
-const { readDB, writeDB, nanoid } = require('../../../lib/db');
+// pages/api/modules/index.js  (ESM)
+import dbmod from '../../../lib/db';                 // lib/db is CommonJS
+const { readDB, writeDB, nanoid } = dbmod;
 
 function applyCORS(req, res) {
   const origin = req.headers.origin;
-  const allowed = [
-    process.env.STOREFRONT_ORIGIN,  // e.g. https://www.monodsports.com
-    process.env.LOCAL_ORIGIN        // e.g. http://localhost:3000
-  ].filter(Boolean);
-
+  const allowed = [process.env.STOREFRONT_ORIGIN, process.env.LOCAL_ORIGIN].filter(Boolean);
   if (allowed.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
   } else {
-    // fallback for same-origin calls
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
   }
-
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   applyCORS(req, res);
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -36,9 +31,9 @@ module.exports = async function handler(req, res) {
     try {
       const body = req.body || {};
       const db = await readDB();
+
       const id = 'mod_' + nanoid(8);
       const now = new Date().toISOString();
-
       const mod = {
         id,
         title: body.title || 'Untitled',
@@ -47,7 +42,7 @@ module.exports = async function handler(req, res) {
         accessCode: body.accessCode || '',
         slides: [],
         createdAt: now,
-        updatedAt: now
+        updatedAt: now,
       };
 
       const next = { ...db, modules: [mod, ...(db.modules || [])] };
@@ -59,4 +54,4 @@ module.exports = async function handler(req, res) {
   }
 
   return res.status(405).end();
-};
+}
