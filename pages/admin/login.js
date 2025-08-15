@@ -11,11 +11,14 @@ export default function Login() {
     setBusy(true); setErr('');
     try {
       const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ password: pw })
-      });
-      if (!res.ok) throw new Error('Incorrect password');
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include',
+  body: JSON.stringify({ password: pw }),
+});
+if (!res.ok) { setErr('Incorrect password'); setBusy(false); return; }
+setTimeout(() => window.location.replace('/admin'), 50);
+
       window.location.href = '/admin';
     } catch (e) {
       setErr(e.message || 'Login failed');

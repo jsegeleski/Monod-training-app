@@ -7,11 +7,6 @@ function setCORS(res) {
 }
 
 export default function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    return res.status(200).end();
-  }
   if (req.method !== 'POST') return res.status(405).end();
 
   const { password } = req.body || {};
@@ -19,11 +14,13 @@ export default function handler(req, res) {
     return res.status(401).json({ ok: false, error: 'Invalid password' });
   }
 
-  // Set a same-origin cookie for admin
+  // NOTE: No HttpOnly so the client-side AdminLayout can read it.
+  // Keep it SameSite=Lax + Secure (Vercel is HTTPS) and short-lived.
   res.setHeader(
     'Set-Cookie',
-    `admin_auth=true; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 8}`
+    `admin_auth=true; Path=/; Secure; SameSite=Lax; Max-Age=${60 * 60 * 8}`
   );
   return res.status(200).json({ ok: true });
 }
+
 
