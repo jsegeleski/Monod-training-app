@@ -161,9 +161,17 @@ async function renderManagerPicker() {
 
   // Actions
   const actions = el('div', { class: 'training-actions', style: 'justify-content:center' }, [
-    el('button', { class: 'btn ghost', id: 'cancel' }, [document.createTextNode('Back')]),
-    el('button', { class: 'btn primary', id: 'start' }, [document.createTextNode('Start Session')]),
-  ]);
+  el('a', {
+    href: host + '/admin',
+    target: '_blank',
+    rel: 'noopener',
+    class: 'btn ghost'
+  }, [document.createTextNode('Open Admin')]),
+
+  el('button', { class: 'btn ghost', id: 'cancel' }, [document.createTextNode('Back')]),
+  el('button', { class: 'btn', id: 'start' }, [document.createTextNode('Start Session')]),
+]);
+
   card.appendChild(actions);
 
   // Wire buttons
