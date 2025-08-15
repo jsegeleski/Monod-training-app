@@ -48,15 +48,32 @@ export default function ModuleEditor() {
   }
 
   async function save() {
-    setBusy(true); setMsg('');
-    const r = await fetch(`/api/modules/${mod.id}`, {
-      method: 'PUT',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ module: mod })
-    });
-    setBusy(false);
-    if (r.ok) { setMsg('Saved'); load(); } else { setMsg('Save failed'); }
+  setBusy(true);
+  setMsg('');
+
+  const r = await fetch(`/api/modules/${mod.id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: mod.title,
+      description: mod.description,
+      accessCode: mod.accessCode,
+      isPublished: !!mod.isPublished,
+      slides: Array.isArray(mod.slides) ? mod.slides : [],
+    }),
+  });
+
+  setBusy(false);
+
+  if (r.ok) {
+    const { module: saved } = await r.json();
+    setMod(saved); // keep UI in sync with server
+    setMsg('Saved');
+  } else {
+    setMsg('Save failed');
   }
+}
+
 
   async function togglePublish() {
     setField('isPublished', !mod.isPublished);
