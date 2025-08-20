@@ -500,11 +500,11 @@ function hasStarted(mod) {
     root.innerHTML = '';
     const card = el('div', { class: 'training-card' }, [
       el('div', { class: 'training-header' }, [
-        el('div', { class: 'training-title' }, [document.createTextNode('All done ✅')]),
+        el('div', { class: 'training-title' }, [document.createTextNode('Module Complete')]),
         el('div', { class: 'muted' }, [document.createTextNode(module.title)]),
       ]),
       el('div', { class: 'training-body' }, [
-        el('p', {}, [document.createTextNode('Nice work. You can close this window or jump back to modules.')]),
+        el('p', {}, [document.createTextNode('Nice work. You can jump back to modules to complete your trainging.')]),
         el('div', { class: 'training-actions' }, [
           el('button', { class: 'btn' }, [document.createTextNode('Back to modules')])
         ])
