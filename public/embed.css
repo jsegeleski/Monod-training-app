@@ -13,7 +13,7 @@
 .training-progress {
   width: 100%; height: 8px; background: #f1f5f9; border-radius: 9999px; overflow:hidden;
 }
-.training-progress > div { height: 100%; background: #49795d; width: 0%; transition: width .25s ease; }
+.training-progress > div { height: 100%; background: #0ea5e9; width: 0%; transition: width .25s ease; }
 .training-body { display: grid; gap: 16px; }
 /* Base button style */
 /* Base button style */
