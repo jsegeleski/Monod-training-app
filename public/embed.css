@@ -1,68 +1,91 @@
 :host, .training-root * { box-sizing: border-box; }
 .training-root {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  color: #0f172a; background: #ffffff; line-height: 1.45;
+  color: #0f172a;
+  background: #ffffff;
+  line-height: 1.45;
 }
+
+/* ========== CARD: now uses a background image with a soft overlay ========== */
 .training-card {
-  border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06); background: #fff;
-  
+  position: relative;
+  border: 1px solid #e6e6e6;
+  border-radius: 16px;
+  padding: 20px;
+  background: transparent;                 /* bg handled in ::before */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  overflow: hidden;                        /* clip bg corners */
 }
+
+/* background image + gentle overlays for readability */
+.training-card::before,
+.training-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 16px;
+}
+.training-card::before {
+  /* 👇 replace with your hosted image (Shopify Files/CDN) */
+  background:
+    radial-gradient(800px 400px at 15% 0%, rgba(255,255,255,.55), rgba(255,255,255,0)),
+    url('/training/bg.jpg') center/cover no-repeat;
+  filter: saturate(120%);
+}
+.training-card::after {
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,.35), rgba(255,255,255,.35));
+}
+
+/* lift real content above bg layers */
+.training-card > * { position: relative; z-index: 1; }
+
+/* Header / title / progress spacing stays the same */
 .training-header { display:flex; justify-content: space-between; align-items:center; margin-bottom: 12px; }
 .training-title { font-weight: 700; font-size: 18px; }
+
+/* progress: a bit clearer over a textured bg */
 .training-progress {
-  width: 100%; height: 8px; background: #f1f5f9; border-radius: 9999px; overflow:hidden;
+  width: 100%;
+  height: 8px;
+  background: rgba(241,245,249,.85);
+  border-radius: 9999px;
+  overflow:hidden;
+  margin-top: 4px;
 }
-.training-progress > div { height: 100%; background: #0ea5e9; width: 0%; transition: width .25s ease; }
+.training-progress > div {
+  height: 100%;
+  background: linear-gradient(90deg,#0ea5e9,#60a5fa);
+  width: 0%;
+  transition: width .25s ease;
+}
+
 .training-body { display: grid; gap: 16px; }
-/* Base button style */
-/* Base button style */
+
+/* ================= Buttons ================= */
 .btn {
   display: inline-block;
-  font-family: Arial, Helvetica, sans-serif; /* cleaner font */
-  font-size: 0.95rem; /* slightly smaller */
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.95rem;
   font-weight: 500;
   background-color: #000;
   color: #fff;
-  padding: 0.5rem 1.5rem; /* reduced padding for smaller size */
+  padding: 0.5rem 1.5rem;
   border: none;
-  border-radius: 9999px; /* pill shape */
+  border-radius: 9999px;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
   transition: all 0.2s ease;
 }
+.btn:hover { background-color: #333; transform: translateY(-1px); }
+.btn.ghost { background-color: transparent; border: 1px solid #000; color: #000; }
+.btn.ghost:hover { background-color: #000; color: #fff; }
 
-/* Hover effect */
-.btn:hover {
-  background-color: #333;
-  transform: translateY(-1px);
-}
+.training-actions { display:flex; gap:1rem; justify-content:center; margin-top:1.5rem; }
 
-/* Ghost / outline button */
-.btn.ghost {
-  background-color: transparent;
-  border: 1px solid #000;
-  color: #000;
-}
-
-.btn.ghost:hover {
-  background-color: #000;
-  color: #fff;
-}
-
-/* Actions container */
-.training-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-
-
-
-/* Hero banner with overlay */
+/* ================= Hero banner (unchanged) ================= */
 .training-hero.banner {
   position: relative;
   padding: 48px 16px;
@@ -82,68 +105,49 @@
 .training-hero.banner h2 { color: #fff; }
 .training-hero.banner p { color: #e5e7eb; }
 
-.option {
-  border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; cursor: pointer;
+/* ================= Module tiles: frosted glass ================= */
+.module-card {
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  display:flex; flex-direction:column; gap:6px; min-height:120px;
+  background: rgba(255,255,255,.55);
+  backdrop-filter: saturate(140%) blur(10px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  transition: .15s;
 }
-.option.correct { border-color: #22c55e; background: #ecfdf5; }
-.option.wrong { border-color: #ef4444; background: #fef2f2; }
-.muted { color: #64748b; font-size: 13px; }
-.list ul { padding-left: 18px; margin: 6px 0; }
-.training-grid { display:grid; gap: 16px; }
-img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb; }
-.module-card { border:1px solid #e5e7eb; border-radius: 12px; padding: 16px; cursor: pointer; display:flex; flex-direction:column; gap:6px; min-height:120px; }
-.module-card:hover { background:#f8fafc; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.05); transition: .15s; }
-.training-grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-.training-card {
-  border: 1px solid #e6e6e6;
-  border-radius: 14px;
-  padding: 20px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-}
-
-.training-title { font-weight: 700; letter-spacing: 0.2px; }
-
-.training-progress { height: 6px; border-radius: 9999px; }
-.training-progress > div { transition: width .25s ease; }
-
-.module-card { border-radius: 12px; }
+.module-card:hover { background: rgba(255,255,255,.70); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.08); }
 .module-card .title { font-weight: 600; }
 .module-card .muted { color: #6b7280; }
 
-/* Manager/Trainee screens */
-.training-hero { text-align:center; padding: 32px 16px; }
-.training-hero h2 { margin: 0 0 8px; }
-.training-hero p { margin: 0 0 16px; color: #64748b; }
+.training-grid { display:grid; gap: 16px; }
+.training-grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
 
-/* Progress chip in module cards */
-/* Cleaner progress presentation */
+/* Progress chips/bars look nicer on glass */
 .progress-wrap { display:grid; grid-template-columns: 1fr auto; align-items:center; gap:10px; }
 .progress-chip {
-  font-size: 12px; color: #0f172a; border: 1px solid #e2e8f0;
-  padding: 2px 8px; border-radius: 9999px; background: #f8fafc;
+  font-size: 12px; color: #0f172a; border: 1px solid rgba(226,232,240,.9);
+  padding: 2px 8px; border-radius: 9999px; background: rgba(248,250,252,.8);
 }
-.progress-bar { width: 100%; height: 6px; background: #eef2f7; border-radius: 9999px; overflow: hidden; }
+.progress-bar { width: 100%; height: 6px; background: rgba(238,242,247,.9); border-radius: 9999px; overflow: hidden; }
 .progress-bar > div {
   height: 100%;
   width: 0%;
-  background: #0ea5e9;       /* visible fill */
+  background: linear-gradient(90deg,#0ea5e9,#60a5fa);
   border-radius: 9999px;
   transition: width .25s ease;
 }
 
 .module-card.completed .progress-chip { background:#ecfdf5; border-color:#86efac; color:#065f46; }
-.module-card.completed .progress-bar > div {
-  background: #16a34a;
-}
-
-/* States */
+.module-card.completed .progress-bar > div { background: #16a34a; }
 .module-card.selected { border-color: #0ea5e9; background:#f0f9ff; }
 .module-card.completed { border-color: #16a34a; background:#ecfdf5; }
 
-/* Clean inputs, not blue, constrained width */
+/* ================= Inputs ================= */
 .input {
   width: 100%;
-  max-width: 360px;             /* << smaller */
+  max-width: 360px;
   padding: 12px 14px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
@@ -152,49 +156,54 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
   font-weight: 500;
   font-size: 16px;
 }
-.input:focus {
-  outline: none;
-  border-color: #94a3b8;
-  box-shadow: 0 0 0 3px rgba(148,163,184,.25);
-}
+.input:focus { outline: none; border-color: #94a3b8; box-shadow: 0 0 0 3px rgba(148,163,184,.25); }
 
-/* Quiz label chip */
-.quiz-label {
-  display: inline-flex; gap:6px; align-items:center;
-  font-size: 12px; font-weight: 700; letter-spacing: .3px;
-  color: #0f172a; background: #e2e8f0; border: 1px solid #cbd5e1;
-  padding: 2px 8px; border-radius: 9999px; text-transform: uppercase;
-}
+/* ================= Quiz bits ================= */
+.option { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; cursor: pointer; }
+.option.correct { border-color: #22c55e; background: #ecfdf5; }
+.option.wrong   { border-color: #ef4444; background: #fef2f2; }
+.muted { color: #64748b; font-size: 13px; }
+.list ul { padding-left: 18px; margin: 6px 0; }
 
-.center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;   /* center horizontally */
-  gap: 12px;
-}
+.training-hero { text-align:center; padding: 32px 16px; }
+.training-hero h2 { margin: 0 0 8px; }
+.training-hero p { margin: 0 0 16px; color: #64748b; }
 
-/* Vertical spacing utility */
-.stack-lg { margin-bottom: 16px; }  /* adds space below an element */
+/* ================= Slide split: glass image panel ================= */
+img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb; }
 
-/* split layout for slides with images */
 .training-split {
   display: flex;
   gap: 24px;
   align-items: flex-start;
-  margin-top: 8px;  
+  margin-top: 8px;
 }
-
 .training-text { flex: 1 1 55%; min-width: 0; }
-.training-media { flex: 1 1 45%; display: flex; justify-content: center; }
+
+/* Right panel becomes frosted glass so it feels cohesive */
+.training-media {
+  flex: 1 1 45%;
+  display: flex; justify-content: center;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 12px;
+  padding: 12px;
+  backdrop-filter: saturate(130%) blur(10px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.05);
+}
 
 .training-image {
   width: 100%;
   height: auto;
-  max-height: 420px;  /* keeps images from being huge */
-  object-fit: cover;
+  max-height: 420px;
+  object-fit: contain; /* prevent crop of product shots */
   border-radius: 10px;
-  margin-top: 8px;  
+  margin-top: 8px;
 }
+
+/* ================= Subtle view transition helper ================= */
+@keyframes fadeInUp { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+.fade-in { animation: fadeInUp .22s ease-out; }
 
 /* stack on mobile */
 @media (max-width: 900px) {
