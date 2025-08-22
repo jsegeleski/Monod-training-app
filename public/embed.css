@@ -28,15 +28,16 @@
   border-radius: 16px;
 }
 .training-card::before {
-  /* 👇 replace with your hosted image (Shopify Files/CDN) */
+  /* dark overlay (first), image (second) — note the comma */
   background:
-    linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.25))
+    linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
     url('https://cdn.shopify.com/s/files/1/0654/3881/0355/files/IMG_6856_resize.webp?v=1755808598') center/cover no-repeat;
   filter: saturate(120%);
 }
+
+/* remove the brightening wash entirely */
 .training-card::after {
-  background:
-    none
+  background: none;
 }
 
 /* lift real content above bg layers */
