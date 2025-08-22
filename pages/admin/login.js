@@ -41,7 +41,13 @@ setTimeout(() => window.location.replace('/admin'), 50);
           <form onSubmit={submit} className="slide-list">
             <input className="input" type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Password" />
             {err ? <div className="badge" style={{borderColor:'#5a2430', color:'#ffb4b4'}}>⚠ {err}</div> : null}
-            <button className="abtn primary" disabled={busy}>{busy ? 'Signing in…' : 'Continue'}</button>
+            <button 
+  type="submit"                // <-- add this
+  className="abtn primary" 
+  disabled={busy}
+>
+  {busy ? 'Signing in…' : 'Continue'}
+</button>
           </form>
         </div>
       </main>
