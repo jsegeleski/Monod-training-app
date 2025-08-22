@@ -191,7 +191,7 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
   width: 100%;
   height: auto;
   max-height: 420px;  /* keeps images from being huge */
-  object-fit: fill;
+  object-fit: cover;
   border-radius: 10px;
   margin-top: 8px;  
 }
