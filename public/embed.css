@@ -269,3 +269,174 @@ img.training-image { width: 100%; border-radius: 12px; border: 0px solid #e5e7eb
 
 /* and a stronger offset for module tiles */
 .training-card .module-card { margin-top: 18px; }
+
+/*/////////////////////////
+
+/* =========================
+   macOS / iOS Dark Theme
+   (drop at the end of embed.css)
+   ========================= */
+
+/* Accent + palette */
+:root {
+  --bg-0: #0e1116;                 /* page bg */
+  --panel-0: rgba(28,31,36,.92);   /* card base */
+  --panel-1: rgba(22,24,28,.92);   /* subtle gradient */
+  --line-0: rgba(255,255,255,.06); /* hairline */
+  --line-1: rgba(255,255,255,.12);
+  --txt-0: #e5e7eb;                /* primary text */
+  --txt-1: #a8b1bd;                /* secondary text */
+  --chip: rgba(255,255,255,.08);
+  --rail: rgba(255,255,255,.08);
+  --accent: #0a84ff;               /* mac blue */
+  --accent-2: #5aa2ff;
+}
+
+/* Page background */
+.training-root {
+  background: radial-gradient(1400px 500px at 50% -10%, #12161d, transparent 60%),
+              var(--bg-0);
+  color: var(--txt-0);
+}
+
+/* Remove the photo overlays; make the card a dark glass panel */
+.training-card {
+  border-radius: 16px;
+  border: 1px solid var(--line-0);
+  background: linear-gradient(180deg, var(--panel-0), var(--panel-1));
+  box-shadow: 0 18px 40px rgba(0,0,0,.45);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  min-height: clamp(480px, 58vh, 780px);
+}
+
+/* kill background-image layers from earlier */
+.training-card::before,
+.training-card::after { background: none !important; }
+
+/* Titles + muted copy */
+.training-title { font-weight: 700; letter-spacing: .2px; }
+.muted { color: var(--txt-1); }
+
+/* Progress bar */
+.training-progress {
+  background: var(--rail);
+  height: 8px; border-radius: 9999px; overflow: hidden;
+}
+.training-progress > div {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+/* Buttons */
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 9999px;
+  border: 0;
+  box-shadow: 0 6px 16px rgba(10,132,255,.25);
+  transition: transform .06s ease, box-shadow .15s ease, background .15s ease;
+}
+.btn:hover { background: #177eff; transform: translateY(-1px); }
+.btn.ghost {
+  background: transparent; color: var(--txt-0);
+  border: 1px solid var(--line-1);
+}
+.btn.ghost:hover { background: rgba(255,255,255,.06); }
+
+/* Inputs */
+.input {
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--line-0);
+  color: var(--txt-0);
+}
+.input::placeholder { color: var(--txt-1); }
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(10,132,255,.25);
+}
+
+/* Module tiles (glass panels) */
+.module-card {
+  border: 1px solid var(--line-0) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  box-shadow: 0 10px 26px rgba(0,0,0,.28);
+}
+.module-card:hover {
+  border-color: var(--line-1);
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+}
+
+/* Progress chip on module card */
+.progress-chip {
+  background: var(--chip);
+  border: 1px solid var(--line-0);
+  color: var(--txt-0);
+}
+.progress-bar { background: var(--rail); }
+.progress-bar > div { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+
+/* Slide layout: more room for text, image with no borders */
+.training-split { gap: 24px; }
+.training-text  { flex: 1 1 62%; min-width: 0; }
+.training-media { flex: 0 1 38%; max-width: 38%; padding: 0; background: transparent; border: 0; box-shadow: none; }
+img.training-image,
+.training-image { width: 100%; height: 100%; max-height: 460px; object-fit: cover; border: 0 !important; border-radius: 12px; }
+
+/* Quiz options (dark cards with hover) */
+.option {
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--line-0);
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+  transition: transform .06s ease, box-shadow .2s ease, background .15s ease, border-color .15s ease;
+}
+.option:hover {
+  background: rgba(255,255,255,.08);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(0,0,0,.35);
+  border-color: var(--line-1);
+}
+.option.correct { background:#06351f; border-color:#18c37e; }
+.option.wrong   { background:#3a0d0d; border-color:#ff6b6b; }
+
+/* Center interactive content vertically; keep title/subtitle top */
+.training-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+.training-card > :first-child { grid-row: 1; }
+.training-card > :not(:first-child) {
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+}
+.training-card form,
+.training-card .center,
+.training-card .training-actions { 
+  min-height: 32vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+
+/* Spacing polish for trainee name vs modules */
+.training-card .input:first-of-type { margin-bottom: 24px; }
+.training-card .module-card        { margin-top: 18px; }
+
+/* Table-style hairlines (if any lists) */
+.table thead th { color: var(--txt-1); }
+.table td, .table th { border-color: var(--line-0); }
+
+/* Home link – subtle underline hover */
+.training-header a,
+a.home-link {
+  color: var(--txt-0);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color .15s ease, text-underline-offset .15s ease;
+}
+.training-header a:hover,
+a.home-link:hover {
+  color: var(--accent);
+  text-underline-offset: 4px;
+}
