@@ -363,6 +363,27 @@ img.training-image { width: 100%; border-radius: 12px; border: 0px solid #e5e7eb
   color: #fff;
 }
 
+/* Secondary / subtle button style (e.g. Reset Session) */
+.btn.secondary {
+  background-color: #f9fafb;   /* very light grey */
+  color: #111;
+  border: 1px solid #e5e7eb;   /* subtle border */
+  padding: 0.4rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.btn.secondary:hover {
+  background-color: #f3f4f6;   /* slightly darker grey */
+  border-color: #d1d5db;
+}
+
+.btn.secondary:active {
+  background-color: #e5e7eb;
+}
+
 /* Module tiles: white cards, no visible border halo, tidy shadow on hover */
 .training-grid { display:grid; gap:16px; }
 .training-grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
