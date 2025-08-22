@@ -28,16 +28,15 @@
   border-radius: 16px;
 }
 .training-card::before {
-  /* dark overlay (first), image (second) — note the comma */
+  /* 👇 replace with your hosted image (Shopify Files/CDN) */
   background:
-    linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.35)),
-    url('https://cdn.shopify.com/s/files/1/0654/3881/0355/files/IMG_6856_resize.webp?v=1755808598') center/cover no-repeat;
+    radial-gradient(800px 400px at 15% 0%, rgba(255,255,255,.55), rgba(255,255,255,0)),
+    url('https://cdn.shopify.com/s/files/1/0654/3881/0355/files/Monod_s_Storefront.jpg?v=1658509319') center/cover no-repeat;
   filter: saturate(120%);
 }
-
-/* remove the brightening wash entirely */
 .training-card::after {
-  background: none;
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,.35), rgba(255,255,255,.35));
 }
 
 /* lift real content above bg layers */
