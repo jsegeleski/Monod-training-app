@@ -1,5 +1,5 @@
 /* ===============================
-   design tokens (safe to tweak)
+   tokens
    =============================== */
 :root {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
@@ -12,8 +12,8 @@
   --border: #e5e7eb;
   --border-strong: #cbd5e1;
 
-  --brand: #0ea5e9;   /* progress + accents */
-  --link: #0a66ff;    /* link/home color */
+  --brand: #0ea5e9;  /* progress/accent */
+  --link: #0a66ff;  /* link/home */
 
   --ok: #16a34a;
   --ok-bg: #ecfdf5;
@@ -24,8 +24,8 @@
   --radius: 12px;
   --radius-lg: 16px;
 
-  --shadow-1: 0 4px 16px rgba(0,0,0,0.06);
-  --shadow-2: 0 8px 24px rgba(0,0,0,0.08);
+  --shadow-1: 0 4px 16px rgba(0,0,0,.06);
+  --shadow-2: 0 10px 34px rgba(0,0,0,.08);
 
   --space-1: 6px;
   --space-2: 10px;
@@ -33,6 +33,8 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
 
   --progress-h: 8px;
 }
@@ -42,48 +44,36 @@
   font-family: var(--font-sans);
   color: var(--fg);
   background: var(--bg);
-  line-height: 1.5;
+  line-height: 1.55;
+  padding: var(--space-8) var(--space-5); /* page breathing room */
 }
 
 /* ===============================
-   cards / containers
+   cards / shells
    =============================== */
 .training-card {
+  background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  background: #fff;
+  padding: var(--space-7);
   box-shadow: var(--shadow-1);
+  max-width: 1200px;         /* center the experience, not full-bleed */
+  margin: 0 auto var(--space-7);
 }
 
-.module-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-4);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-height: 120px;
-  transition: background .2s ease, box-shadow .2s ease, transform .12s ease;
+.training-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: var(--space-3);
 }
-.module-card:hover { background: var(--bg-muted); transform: translateY(-1px); box-shadow: var(--shadow-2); }
-.module-card .title { font-weight: 600; }
-.module-card .muted { color: #6b7280; }
-.module-card.selected { border-color: var(--brand); background: #f0f9ff; }
-.module-card.completed { border-color: var(--ok); background: var(--ok-bg); }
+.training-title { font-weight: 800; font-size: 20px; letter-spacing: .2px; }
 
 /* ===============================
-   header / titles / hero
+   hero / banner (unchanged API)
    =============================== */
-.training-header { display:flex; justify-content: space-between; align-items:center; margin-bottom: var(--space-3); }
-.training-title  { font-weight: 700; font-size: 18px; letter-spacing: .2px; }
-
-.training-hero { text-align:center; padding: 32px 16px; }
-.training-hero h2 { margin: 0 0 8px; }
+.training-hero { text-align:center; padding: 28px 16px 10px; }
+.training-hero h2 { margin: 0 0 6px; font-size: 34px; font-weight: 800; }
 .training-hero p  { margin: 0 0 16px; color: var(--fg-muted); }
 
-/* banner variant retained */
 .training-hero.banner {
   position: relative;
   padding: 48px 16px;
@@ -102,12 +92,11 @@
 .training-hero.banner h2 { color: #fff; }
 .training-hero.banner p  { color: #e5e7eb; }
 
-/* link-style home (optional) */
+/* Link-style Home (optional – keep using .btn.ghost if you prefer) */
 .training-home {
-  background: none; border: 0; padding: 0;
+  background: transparent; border: 0; padding: 0;
   font: inherit; color: var(--link);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: underline; text-underline-offset: 3px;
   cursor: pointer;
   transition: opacity .15s ease, text-underline-offset .15s ease;
 }
@@ -118,59 +107,53 @@
    =============================== */
 .training-progress {
   width: 100%; height: var(--progress-h);
-  background: #eef2f7; border-radius: 9999px; overflow:hidden;
-  margin-bottom: var(--space-4);
+  background: #eef2f7; border-radius: 9999px; overflow: hidden;
+  margin: var(--space-2) 0 var(--space-6); /* clear from title & content */
 }
-.training-progress > div { height: 100%; background: var(--brand); width: 0%; transition: width .25s ease; }
-
-/* progress chip in module cards */
-.progress-wrap { display:grid; grid-template-columns: 1fr auto; align-items:center; gap:10px; }
-.progress-chip {
-  font-size: 12px; color: var(--fg);
-  border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 9999px; background: var(--bg-muted);
+.training-progress > div {
+  height: 100%; width: 0%;
+  background: var(--brand);
+  transition: width .25s ease;
 }
-.progress-bar { width: 100%; height: var(--progress-h); background: #eef2f7; border-radius: 9999px; overflow: hidden; }
-.progress-bar > div { height: 100%; width: 0%; background: var(--brand); border-radius: 9999px; transition: width .25s ease; }
-.module-card.completed .progress-chip { background: var(--ok-bg); border-color:#86efac; color:#065f46; }
-.module-card.completed .progress-bar > div { background: var(--ok); }
 
 /* ===============================
    body / grids / utilities
    =============================== */
-.training-body { display: grid; gap: var(--space-4); }
-.training-grid { display:grid; gap: var(--space-4); }
+.training-body { display: grid; gap: var(--space-6); }
+.training-grid { display: grid; gap: var(--space-4); }
 .training-grid.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
 @media (max-width: 720px) { .training-grid.cols-2 { grid-template-columns: 1fr; } }
 
-.center { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
-.stack-lg { margin-bottom: var(--space-4); }
+.center { display:flex; flex-direction:column; align-items:center; gap: var(--space-3); }
+.stack-lg { margin-bottom: var(--space-6); }
 
 /* ===============================
    buttons
    =============================== */
 .btn {
-  display: inline-flex; align-items:center; justify-content:center; gap:8px;
+  display: inline-flex; align-items:center; justify-content:center; gap: 8px;
   font-family: var(--font-sans);
-  font-size: .95rem; font-weight: 600; line-height: 1;
-  background-color: #000; color: #fff;
-  padding: .6rem 1.3rem;
-  border: none; border-radius: 9999px;
+  font-size: .95rem; font-weight: 700; line-height: 1;
+  background: #000; color: #fff;
+  padding: .70rem 1.35rem;
+  border: 0; border-radius: 9999px;
   cursor: pointer; text-align: center; text-decoration: none;
   transition: background-color .15s ease, box-shadow .15s ease, transform .05s ease, opacity .15s ease;
 }
-.btn:hover   { background-color: #222; }
-.btn:active  { transform: translateY(1px); }
+.btn:hover { background: #1a1a1a; }
+.btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 
-.btn.ghost {
-  background-color: transparent; border: 1px solid #000; color: #000;
+.btn.ghost { background: transparent; border: 1px solid #000; color: #000; }
+.btn.ghost:hover { background: #000; color: #fff; }
+
+.btn:focus-visible { outline: 2px solid rgba(14,165,233,.35); outline-offset: 2px; }
+
+/* actions row below slides */
+.training-actions {
+  display:flex; gap: 1rem; justify-content:center;
+  margin-top: var(--space-6);
 }
-.btn.ghost:hover { background-color: #000; color: #fff; }
-
-.btn:focus-visible { outline: 2px solid rgba(14,165,233,.3); outline-offset: 2px; }
-
-/* actions bar under slides */
-.training-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; }
 
 /* ===============================
    inputs
@@ -180,23 +163,95 @@
   padding: 12px 14px;
   border: 1px solid var(--border-strong);
   border-radius: 10px;
-  background: #fff; color: var(--fg);
+  background: #fff;
+  color: var(--fg);
   font-weight: 500; font-size: 16px;
   transition: border-color .15s ease, box-shadow .15s ease;
 }
 .input:focus {
-  outline: none; border-color: #94a3b8;
+  outline: none;
+  border-color: #94a3b8;
   box-shadow: 0 0 0 3px rgba(148,163,184,.25);
 }
-/* optional narrower version if you need it somewhere */
-.input--narrow { max-width: 360px; }
+.input--narrow { max-width: 360px; } /* optional */
 
 /* ===============================
-   quiz options / helpers
+   module cards
    =============================== */
+.module-card { transition: background .2s ease, box-shadow .2s ease, transform .12s ease; }
+.module-card:hover { background: var(--bg-muted); transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.module-card .title { font-weight: 600; }
+.module-card .muted { color: #6b7280; }
+.module-card.selected { border-color: var(--brand); background:#f0f9ff; }
+.module-card.completed { border-color: var(--ok); background: var(--ok-bg); }
+
+.progress-wrap { display:grid; grid-template-columns: 1fr auto; align-items:center; gap:10px; }
+.progress-chip {
+  font-size: 12px; color: var(--fg);
+  border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 9999px; background: var(--bg-muted);
+}
+.progress-bar { width: 100%; height: var(--progress-h); background: #eef2f7; border-radius: 9999px; overflow: hidden; }
+.progress-bar > div { height: 100%; width: 0%; background: var(--brand); transition: width .25s ease; }
+.module-card.completed .progress-chip { background: var(--ok-bg); border-color:#86efac; color:#065f46; }
+.module-card.completed .progress-bar > div { background: var(--ok); }
+
+/* ===============================
+   split layout (slides with image)
+   =============================== */
+img.training-image { width: 100%; border-radius: var(--radius); border: 1px solid var(--border); }
+
+.training-split {
+  display: flex;
+  gap: var(--space-7);
+  align-items: flex-start;
+  margin-top: var(--space-3);   /* clear from progress bar */
+}
+
+.training-text  { flex: 1 1 55%; min-width: 0; }
+.training-media {
+  flex: 1 1 45%;
+  display: flex; justify-content: center; align-items: center;
+  background: #fafafa;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+.training-image {
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+  object-fit: contain;          /* prevent crop */
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,.03);
+}
+
+@media (max-width: 900px) {
+  .training-split { flex-direction: column; }
+  .training-media { padding: var(--space-2); }
+  .training-image { max-height: 320px; }
+}
+
+/* ===============================
+   quiz options
+   =============================== */
+.quiz-label {
+  display: inline-flex; gap:6px; align-items:center;
+  font-size: 12px; font-weight: 700; letter-spacing: .3px;
+  color: var(--fg);
+  background: #e2e8f0;
+  border: 1px solid var(--border-strong);
+  padding: 2px 8px; border-radius: 9999px; text-transform: uppercase;
+}
+
 .option {
-  border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 10px 12px; cursor: pointer; background:#fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  background: #fff;
   transition: background .15s ease, border-color .15s ease, transform .05s ease;
 }
 .option:hover { background: var(--bg-muted); }
@@ -206,39 +261,3 @@
 
 .muted { color: var(--fg-muted); font-size: 13px; }
 .list ul { padding-left: 18px; margin: 6px 0; }
-
-/* ===============================
-   images / split slide layout
-   =============================== */
-img.training-image { width: 100%; border-radius: var(--radius); border: 1px solid var(--border); }
-
-.training-split {
-  display: flex; gap: var(--space-6); align-items: flex-start;
-  margin-top: var(--space-3); /* breathing room under progress */
-}
-.training-text  { flex: 1 1 55%; min-width: 0; }
-.training-media { flex: 1 1 45%; display: flex; justify-content: center; }
-.training-image {
-  width: 100%; height: auto;
-  max-height: 420px;
-  object-fit: contain;      /* product images won’t crop */
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,.02);
-  margin-top: var(--space-2);
-}
-@media (max-width: 900px) {
-  .training-split { flex-direction: column; }
-  .training-image { max-height: 320px; }
-}
-
-/* ===============================
-   chips / labels
-   =============================== */
-.quiz-label {
-  display: inline-flex; gap:6px; align-items:center;
-  font-size: 12px; font-weight: 700; letter-spacing: .3px;
-  color: var(--fg); background: #e2e8f0; border: 1px solid var(--border-strong);
-  padding: 2px 8px; border-radius: 9999px; text-transform: uppercase;
-}
