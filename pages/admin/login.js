@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Head from 'next/head';
 
 export default function Login() {
   const [pw, setPw] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const formRef = useRef(null);
 
   async function submit(e) {
-    if (e) e.preventDefault();      // allow programmatic calls
+    if (e) e.preventDefault();
     if (busy) return;
+
     setBusy(true);
     setErr('');
 
@@ -38,7 +40,8 @@ export default function Login() {
     <div className="admin-wrap">
       <Head>
         <title>Admin Login</title>
-        <link relName="stylesheet" href="/admin.css" />
+        {/* fix attribute name */}
+        <link rel="stylesheet" href="/admin.css" />
       </Head>
 
       <main className="admin-main">
@@ -48,7 +51,19 @@ export default function Login() {
             Enter manager/admin password
           </p>
 
-          <form onSubmit={submit} className="slide-list">
+          <form
+            ref={formRef}
+            onSubmit={submit}
+            className="slide-list"
+            onKeyDown={(e) => {
+              // capture Enter anywhere inside the form
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                // ask the browser to submit this form
+                formRef.current?.requestSubmit();
+              }
+            }}
+          >
             <input
               className="input"
               type="password"
@@ -56,19 +71,20 @@ export default function Login() {
               autoFocus
               value={pw}
               onChange={(e) => setPw(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') submit(); // trigger submit on Enter
-              }}
               placeholder="Password"
             />
+
             {err ? (
               <div className="badge" style={{ borderColor: '#5a2430', color: '#ffb4b4' }}>
                 ⚠ {err}
               </div>
             ) : null}
+
+            {/* real submit control so browsers reliably submit on Enter */}
             <button type="submit" className="abtn primary" disabled={busy}>
               {busy ? 'Signing in…' : 'Continue'}
             </button>
+            <input type="submit" hidden aria-hidden="true" tabIndex={-1} />
           </form>
         </div>
       </main>
