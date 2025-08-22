@@ -397,11 +397,24 @@ function hasStarted(mod) {
 
     // CONTENT SLIDE
     if (slide?.type === 'content') {
-      if (slide.imageUrl) body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' }));
-      body.appendChild(el('h3', {}, [document.createTextNode(slide.title || '')]));
-      const rich = el('div', {});
-      try { rich.innerHTML = slide.bodyHtml || ''; } catch {}
-      body.appendChild(rich);
+  const contentWrap = el('div', { class: 'training-split' }, []);
+
+  const textCol = el('div', { class: 'training-text' }, []);
+  textCol.appendChild(el('h3', {}, [document.createTextNode(slide.title || '')]));
+  const rich = el('div', {});
+  try { rich.innerHTML = slide.bodyHtml || ''; } catch {}
+  textCol.appendChild(rich);
+
+  contentWrap.appendChild(textCol);
+
+  if (slide.imageUrl) {
+    const imgCol = el('div', { class: 'training-media' }, [
+      el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' })
+    ]);
+    contentWrap.appendChild(imgCol);
+  }
+
+  body.appendChild(contentWrap);
 
       card.appendChild(header);
       card.appendChild(progress);
@@ -432,59 +445,70 @@ function hasStarted(mod) {
 
     // QUIZ SLIDE
     if (slide?.type === 'quiz') {
-      const q = slide.question || { text: '', options: [] };
-      const opts = Array.isArray(q.options) ? q.options : [];
+  const q = slide.question || { text: '', options: [] };
+  const opts = Array.isArray(q.options) ? q.options : [];
 
-      card.appendChild(header);
-      card.appendChild(progress);
+  card.appendChild(header);
+  card.appendChild(progress);
 
-      // Make QUESTION the prominent heading
-     // body.appendChild(el('div', { class: 'quiz-label' }, [document.createTextNode('Quiz')]));
-      body.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 'Question')]));
-      if (slide.imageUrl) body.appendChild(el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' }));
+  const quizWrap = el('div', { class: 'training-split' }, []);
 
-      if (opts.length === 0) {
-        body.appendChild(el('div', { class: 'muted' }, [document.createTextNode('No options configured yet.')]));
-      } else {
-        const optsWrap = el('div', { class: 'training-grid' },
-          opts.map(o => {
-            const opt = el('div', { class: 'option' }, [document.createTextNode(o.text || '')]);
-            opt.addEventListener('click', () => {
-              const isCorrect = !!o.isCorrect;
-              opt.classList.add(isCorrect ? 'correct' : 'wrong');
-              setTimeout(() => {
-                if (isCorrect) {
-                  const next = Math.min(total - 1, idx + 1);
-                  saveProgress(module.id, next);
-                  if (idx === total - 1) return renderCompletion(module);
-                  renderSlide(module, { idx: next, lastCheckpoint: next });
-                } else {
-                  const back = Math.max(0, Math.min(lastCheckpoint, total - 1));
-                  saveProgress(module.id, back);
-                  renderSlide(module, { idx: back, lastCheckpoint });
-                }
-              }, 250);
-            });
-            return opt;
-          })
-        );
-        body.appendChild(optsWrap);
-      }
+  const textCol = el('div', { class: 'training-text' }, []);
+  textCol.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 'Question')]));
 
-      const actions = el('div', { class: 'training-actions' }, [
-        el('button', { class: 'btn ghost' }, [document.createTextNode('Back')]),
-      ]);
-      actions.children[0].addEventListener('click', () => {
-        const prev = Math.max(0, idx - 1);
-        saveProgress(module.id, prev);
-        renderSlide(module, { idx: prev, lastCheckpoint });
-      });
+  if (opts.length === 0) {
+    textCol.appendChild(el('div', { class: 'muted' }, [document.createTextNode('No options configured yet.')]));
+  } else {
+    const optsWrap = el('div', { class: 'training-grid' },
+      opts.map(o => {
+        const opt = el('div', { class: 'option' }, [document.createTextNode(o.text || '')]);
+        opt.addEventListener('click', () => {
+          const isCorrect = !!o.isCorrect;
+          opt.classList.add(isCorrect ? 'correct' : 'wrong');
+          setTimeout(() => {
+            if (isCorrect) {
+              const next = Math.min(total - 1, idx + 1);
+              saveProgress(module.id, next);
+              if (idx === total - 1) return renderCompletion(module);
+              renderSlide(module, { idx: next, lastCheckpoint: next });
+            } else {
+              const back = Math.max(0, Math.min(lastCheckpoint, total - 1));
+              saveProgress(module.id, back);
+              renderSlide(module, { idx: back, lastCheckpoint });
+            }
+          }, 250);
+        });
+        return opt;
+      })
+    );
+    textCol.appendChild(optsWrap);
+  }
 
-      card.appendChild(body);
-      card.appendChild(actions);
-      root.appendChild(card);
-      return;
-    }
+  quizWrap.appendChild(textCol);
+
+  if (slide.imageUrl) {
+    const imgCol = el('div', { class: 'training-media' }, [
+      el('img', { class: 'training-image', src: slide.imageUrl, alt: slide.title || '' })
+    ]);
+    quizWrap.appendChild(imgCol);
+  }
+
+  body.appendChild(quizWrap);
+
+  const actions = el('div', { class: 'training-actions' }, [
+    el('button', { class: 'btn ghost' }, [document.createTextNode('Back')]),
+  ]);
+  actions.children[0].addEventListener('click', () => {
+    const prev = Math.max(0, idx - 1);
+    saveProgress(module.id, prev);
+    renderSlide(module, { idx: prev, lastCheckpoint });
+  });
+
+  card.appendChild(body);
+  card.appendChild(actions);
+  root.appendChild(card);
+  return;
+}
 
     // Unknown slide type fallback
     root.innerHTML = '<div class="training-card">Unsupported slide type.</div>';
