@@ -27,17 +27,7 @@
   pointer-events: none;
   border-radius: 16px;
 }
-.training-card::before {
-  /* 👇 replace with your hosted image (Shopify Files/CDN) */
-  background:
-    radial-gradient(800px 400px at 15% 0%, rgba(255,255,255,.55), rgba(255,255,255,0)),
-    url('https://cdn.shopify.com/s/files/1/0654/3881/0355/files/1950_s_John_Monod_s_clients_ski_tourning_Sunshine_1950_s.jpg?v=1661880367') center/cover no-repeat;
-  filter: saturate(120%);
-}
-.training-card::after {
-  background:
-    linear-gradient(to bottom, rgba(255,255,255,.35), rgba(255,255,255,.35));
-}
+
 
 /* lift real content above bg layers */
 .training-card > * { position: relative; z-index: 1; }
