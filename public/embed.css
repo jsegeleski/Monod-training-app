@@ -108,7 +108,7 @@
 
 /* ================= Module tiles: frosted glass ================= */
 .module-card {
-  border: 1px solid rgba(255,255,255,.55);
+  border: 0px solid rgba(255,255,255,.55);
   border-radius: 12px;
   padding: 16px;
   cursor: pointer;
@@ -192,7 +192,7 @@
 .training-hero p { margin: 0 0 16px; color: #64748b; }
 
 /* ================= Slide split: glass image panel ================= */
-img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb; }
+img.training-image { width: 100%; border-radius: 12px; border: 0px solid #e5e7eb; }
 
 .training-split {
   display: flex;
@@ -252,3 +252,46 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
   justify-content: center;
   text-align: center;
 }
+
+/* wider text, narrower media */
+.training-text  { flex: 1 1 62%; min-width: 0; }
+.training-media { flex: 0 1 38%; max-width: 38%; }
+@media (max-width: 1100px) {
+  .training-text  { flex-basis: 60%; }
+  .training-media { flex-basis: 40%; }
+}
+@media (max-width: 900px) {
+  .training-text, .training-media { max-width: 100%; }
+}
+
+/* keep titles where they are, center the interactive body */
+.training-card {
+  display: grid;
+  grid-template-rows: auto 1fr;   /* row 1: title/subtitle, row 2: body */
+}
+
+/* the first block (hero/title area) = row 1; everything else = row 2 */
+.training-card > :first-child { grid-row: 1; }
+.training-card > :not(:first-child) {
+  grid-row: 2;
+  align-self: center;               /* vertical center */
+  justify-self: center;             /* horizontal center */
+  width: 100%;
+}
+
+/* ensure forms/buttons center nicely and don’t collapse */
+.training-card form,
+.training-card .center,
+.training-card .training-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 32vh;                 /* gives enough vertical meat to center */
+}
+
+/* more breathing room after the very first input */
+.training-card .input:first-of-type { margin-bottom: 24px; }
+
+/* and a stronger offset for module tiles */
+.training-card .module-card { margin-top: 18px; }
