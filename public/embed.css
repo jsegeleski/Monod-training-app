@@ -60,7 +60,29 @@
 }
 
 
+.training-hero {
+  margin: 0 0 14px 0;
+  font-size: 34px;
+  line-height: 1.2;
+  font-weight: 800;
+}
 
+/* --- Link-style Home button with subtle hover --- */
+.training-home {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: #0a66ff;               /* tweak to your brand color */
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: opacity .15s ease, text-underline-offset .15s ease;
+}
+.training-home:hover { 
+  opacity: .85; 
+  text-underline-offset: 5px; 
+}
 
 /* Hero banner with overlay */
 .training-hero.banner {
@@ -181,6 +203,7 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
   display: flex;
   gap: 24px;
   align-items: flex-start;
+  margin-top: 8px; 
 }
 
 .training-text { flex: 1 1 55%; min-width: 0; }
@@ -192,6 +215,8 @@ img.training-image { width: 100%; border-radius: 12px; border: 1px solid #e5e7eb
   max-height: 420px;  /* keeps images from being huge */
   object-fit: contain;
   border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.06); /* adjust for your theme */
+  margin-top: 8px;  
 }
 
 /* stack on mobile */
