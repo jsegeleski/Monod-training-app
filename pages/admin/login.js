@@ -7,19 +7,27 @@ export default function Login() {
   const [err, setErr] = useState('');
 
   async function submit(e) {
-    e.preventDefault();
-    setBusy(true); setErr('');
+    if (e) e.preventDefault();      // allow programmatic calls
+    if (busy) return;
+    setBusy(true);
+    setErr('');
+
     try {
       const res = await fetch('/api/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  credentials: 'include',
-  body: JSON.stringify({ password: pw }),
-});
-if (!res.ok) { setErr('Incorrect password'); setBusy(false); return; }
-setTimeout(() => window.location.replace('/admin'), 50);
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password: pw }),
+      });
 
-      window.location.href = '/admin';
+      if (!res.ok) {
+        setErr('Incorrect password');
+        setBusy(false);
+        return;
+      }
+
+      // single, reliable redirect
+      window.location.replace('/admin');
     } catch (e) {
       setErr(e.message || 'Login failed');
       setBusy(false);
@@ -30,24 +38,37 @@ setTimeout(() => window.location.replace('/admin'), 50);
     <div className="admin-wrap">
       <Head>
         <title>Admin Login</title>
-        <link rel="stylesheet" href="/admin.css" />
+        <link relName="stylesheet" href="/admin.css" />
       </Head>
 
       <main className="admin-main">
-        <div className="card" style={{maxWidth:420, margin:'10vh auto 0'}}>
-          <h2 style={{margin:'0 0 6px'}}>Sign in</h2>
-          <p className="help" style={{margin:'0 0 16px'}}>Enter manager/admin password</p>
+        <div className="card" style={{ maxWidth: 420, margin: '10vh auto 0' }}>
+          <h2 style={{ margin: '0 0 6px' }}>Sign in</h2>
+          <p className="help" style={{ margin: '0 0 16px' }}>
+            Enter manager/admin password
+          </p>
 
           <form onSubmit={submit} className="slide-list">
-            <input className="input" type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Password" />
-            {err ? <div className="badge" style={{borderColor:'#5a2430', color:'#ffb4b4'}}>⚠ {err}</div> : null}
-            <button 
-  type="submit"                // <-- add this
-  className="abtn primary" 
-  disabled={busy}
->
-  {busy ? 'Signing in…' : 'Continue'}
-</button>
+            <input
+              className="input"
+              type="password"
+              name="password"
+              autoFocus
+              value={pw}
+              onChange={(e) => setPw(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submit(); // trigger submit on Enter
+              }}
+              placeholder="Password"
+            />
+            {err ? (
+              <div className="badge" style={{ borderColor: '#5a2430', color: '#ffb4b4' }}>
+                ⚠ {err}
+              </div>
+            ) : null}
+            <button type="submit" className="abtn primary" disabled={busy}>
+              {busy ? 'Signing in…' : 'Continue'}
+            </button>
           </form>
         </div>
       </main>
