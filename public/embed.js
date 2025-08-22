@@ -388,7 +388,7 @@ homeBtn.addEventListener('click', () => {
 });
 
 // Persistent page title above the card
-const pageTitle = el('h1', { class: 'training-hero' }, [document.createTextNode('Monod Sports Staff Training')]);
+const pageTitle = el('h2', { class: 'training-hero' }, [document.createTextNode('Monod Sports Staff Training')]);
 root.appendChild(pageTitle);
 
 // In-card header (keeps module title if you want it)
