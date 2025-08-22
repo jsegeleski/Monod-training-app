@@ -379,17 +379,23 @@ function hasStarted(mod) {
     root.innerHTML = '';
 
     // Header
-    const homeBtn = el('button', { class: 'btn ghost', id: 'home-btn' }, [document.createTextNode('Home')]);
-    homeBtn.addEventListener('click', () => {
-      const sess = getSession();
-      if (sess?.selected?.length) return renderTraineeWelcome(sess.selected);
-      init(true);
-    });
+    // Header / Home (link-style)
+const homeBtn = el('button', { class: 'training-home', id: 'home-btn' }, [document.createTextNode('Home')]);
+homeBtn.addEventListener('click', () => {
+  const sess = getSession();
+  if (sess?.selected?.length) return renderTraineeWelcome(sess.selected);
+  init(true);
+});
 
-    const header = el('div', { class: 'training-header' }, [
-      el('div', { class: 'training-title' }, [document.createTextNode(module.title || 'Training')]),
-      el('div', {}, [homeBtn]),
-    ]);
+// Persistent page title above the card
+const pageTitle = el('h1', { class: 'training-hero' }, [document.createTextNode('Monod Sports Staff Training')]);
+root.appendChild(pageTitle);
+
+// In-card header (keeps module title if you want it)
+const header = el('div', { class: 'training-header' }, [
+  el('div', { class: 'training-title' }, [document.createTextNode(module.title || 'Training')]),
+  el('div', {}, [homeBtn]),
+]);
 
     const progress = ProgressBar(total, idx + 1);
     const body = el('div', { class: 'training-body' });
