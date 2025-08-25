@@ -1,9 +1,10 @@
 // pages/admin/index.js
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { withAdminGuard } from '../../lib/adminGuard';
+import adminGuard from '../../lib/adminGuard';
 
-export const getServerSideProps = withAdminGuard(async () => ({ props: {} }));
+// ✅ Only SSR guard here
+export const getServerSideProps = adminGuard;
 
 export default function AdminHome() {
   const [mods, setMods] = useState([]);
