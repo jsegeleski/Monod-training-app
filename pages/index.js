@@ -1,3 +1,5 @@
+import { withAdminGuard } from '../../lib/adminGuard';
+export const getServerSideProps = withAdminGuard();
 export default function Home() {
   return (
     <div className="container">
