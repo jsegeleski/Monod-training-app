@@ -1,7 +1,6 @@
-// pages/api/auth/debug.js
-export default function handler(req, res) {
-  res.setHeader('Cache-Control', 'no-store');
-  res.status(200).json({
-    cookiesHeader: req.headers.cookie || '(none)'
-  });
+// pages/admin/_debug.js  (temporary)
+import { parse } from 'cookie';
+export async function getServerSideProps(ctx) {
+  return { props: { cookies: parse(ctx.req?.headers?.cookie || '') } };
 }
+export default function Debug({ cookies }) { return <pre>{JSON.stringify(cookies, null, 2)}</pre>; }
