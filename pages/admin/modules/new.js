@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Router from 'next/router';
-import { requireAdmin } from '../../../lib/adminGuard';
+import Router from 'next/router'; // (delete if unused)
+
 import adminGuard from '../../../lib/adminGuard';
 export const getServerSideProps = adminGuard;
 

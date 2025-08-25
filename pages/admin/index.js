@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 
+import adminGuard from '../../lib/adminGuard';
+export const getServerSideProps = adminGuard;
+
 export default function AdminHome() {
   const [mods, setMods] = useState([]);
   const [busy, setBusy] = useState(false);
