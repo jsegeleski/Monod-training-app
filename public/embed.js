@@ -401,16 +401,18 @@ const header = el('div', { class: 'training-header' }, [
     const body = el('div', { class: 'training-body' });
     const card = el('div', { class: 'training-card' });
 
-    // CONTENT SLIDE
-    if (slide?.type === 'content') {
-  const contentWrap = el('div', { class: 'training-split' }, []);
+// CONTENT SLIDE
+if (slide?.type === 'content') {
+  // 👇 key change: body gets .no-image when slide.imageUrl is falsy
+  const body = el('div', { class: slide.imageUrl ? 'training-body' : 'training-body no-image' });
 
-  const textCol = el('div', { class: 'training-text' }, []);
+  const contentWrap = el('div', { class: 'training-split' });
+
+  const textCol = el('div', { class: 'training-text' });
   textCol.appendChild(el('h3', {}, [document.createTextNode(slide.title || '')]));
   const rich = el('div', {});
   try { rich.innerHTML = slide.bodyHtml || ''; } catch {}
   textCol.appendChild(rich);
-
   contentWrap.appendChild(textCol);
 
   if (slide.imageUrl) {
@@ -422,53 +424,59 @@ const header = el('div', { class: 'training-header' }, [
 
   body.appendChild(contentWrap);
 
-      card.appendChild(header);
-      card.appendChild(progress);
-      card.appendChild(body);
+  card.appendChild(header);
+  card.appendChild(progress);
+  card.appendChild(body);
 
-      const actions = el('div', { class: 'training-actions' }, [
-        el('button', { class: 'btn ghost' }, [document.createTextNode('Back')]),
-        el('button', { class: 'btn primary' }, [document.createTextNode(idx === total - 1 ? 'Finish' : 'Next')]),
-      ]);
+  const actions = el('div', { class: 'training-actions' }, [
+    el('button', { class: 'btn ghost' }, [document.createTextNode('Back')]),
+    el('button', { class: 'btn primary' }, [document.createTextNode(idx === total - 1 ? 'Finish' : 'Next')]),
+  ]);
 
-      actions.children[0].addEventListener('click', () => {
-        const prev = Math.max(0, idx - 1);
-        saveProgress(module.id, prev);
-        renderSlide(module, { idx: prev, lastCheckpoint });
-      });
+  actions.children[0].addEventListener('click', () => {
+    const prev = Math.max(0, idx - 1);
+    saveProgress(module.id, prev);
+    renderSlide(module, { idx: prev, lastCheckpoint });
+  });
 
-      actions.children[1].addEventListener('click', () => {
-        if (idx === total - 1) return renderCompletion(module);
-        const next = Math.min(total - 1, idx + 1);
-        saveProgress(module.id, next);
-        renderSlide(module, { idx: next, lastCheckpoint });
-      });
+  actions.children[1].addEventListener('click', () => {
+    if (idx === total - 1) return renderCompletion(module);
+    const next = Math.min(total - 1, idx + 1);
+    saveProgress(module.id, next);
+    renderSlide(module, { idx: next, lastCheckpoint });
+  });
 
-      card.appendChild(actions);
-      root.appendChild(card);
-      return;
-    }
+  card.appendChild(actions);
+  root.appendChild(card);
+  return;
+}
 
-    // QUIZ SLIDE
-    if (slide?.type === 'quiz') {
+// QUIZ SLIDE
+if (slide?.type === 'quiz') {
   const q = slide.question || { text: '', options: [] };
   const opts = Array.isArray(q.options) ? q.options : [];
 
   card.appendChild(header);
   card.appendChild(progress);
 
-  const quizWrap = el('div', { class: 'training-split' }, []);
+  // 👇 key: raise content when there's no image
+  const body = el('div', { class: slide.imageUrl ? 'training-body' : 'training-body no-image' });
 
-  const textCol = el('div', { class: 'training-text' }, []);
+  const quizWrap = el('div', { class: 'training-split' });
+
+  const textCol = el('div', { class: 'training-text' });
   textCol.appendChild(el('h3', {}, [document.createTextNode(q.text || slide.title || 'Question')]));
 
   if (opts.length === 0) {
     textCol.appendChild(el('div', { class: 'muted' }, [document.createTextNode('No options configured yet.')]));
   } else {
     const optsWrap = el('div', { class: 'training-grid' },
-      opts.map(o => {
-        const opt = el('div', { class: 'option' }, [document.createTextNode(o.text || '')]);
-        opt.addEventListener('click', () => {
+      opts.map((o) => {
+        const opt = el('div', { class: 'option', role: 'button', tabIndex: 0 }, [
+          document.createTextNode(o.text || '')
+        ]);
+
+        function choose() {
           const isCorrect = !!o.isCorrect;
           opt.classList.add(isCorrect ? 'correct' : 'wrong');
           setTimeout(() => {
@@ -482,8 +490,14 @@ const header = el('div', { class: 'training-header' }, [
               saveProgress(module.id, back);
               renderSlide(module, { idx: back, lastCheckpoint });
             }
-          }, 250);
+          }, 220);
+        }
+
+        opt.addEventListener('click', choose);
+        opt.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(); }
         });
+
         return opt;
       })
     );

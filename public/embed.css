@@ -475,3 +475,15 @@ img.training-image { width: 100%; border-radius: 12px; border: 0px solid #e5e7eb
   .training-image { max-height: 360px; }
 }
 @media (max-width: 720px) { .training-grid.cols-2 { grid-template-columns: 1fr; } }
+
+/* When a slide has no image, tighten spacing so text sits higher */
+.training-body.no-image {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: flex-start;
+  min-height: 280px; /* keeps a balanced card height */
+  padding-top: 8px;  /* pushes text closer to top */
+}
+
+.training-body.no-image { justify-content:flex-start; padding-top:8px; }
