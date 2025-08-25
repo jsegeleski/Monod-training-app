@@ -105,54 +105,50 @@ function renderManagerGate() {
     })
   ]);
 
-  // Right: form panel
-  const panel = el('div', { class: 'split-panel' }, [
-    el('div', { class: 'split-card' }, [
-      el('h1', {}, [document.createTextNode('Staff Training')]),
-      el('p', { class: 'lead' }, [document.createTextNode('Manager access required to start a session.')]),
+ // Right: form panel (no nested card)
+const panel = el('div', { class: 'split-panel' }, [
+  el('h1', {}, [document.createTextNode('Staff Training')]),
+  el('p', { class: 'lead' }, [document.createTextNode('Manager access required to start a session.')]),
 
-      // Form
-      (() => {
-        const form = el('form', { class: 'slide-list' }, [
-          el('input', {
-            type: 'password',
-            class: 'input',
-            id: 'mgr-pass',
-            placeholder: 'Manager password',
-            autocomplete: 'current-password'
-          }),
-          el('div', { class: 'split-actions' }, [
-            el('button', { class: 'abtn primary', id: 'mgr-continue', type: 'submit' }, [
-              document.createTextNode('Continue')
-            ])
-          ])
-        ]);
+  (() => {
+    const form = el('form', { class: 'slide-list' }, [
+      el('input', {
+        type: 'password',
+        class: 'input',
+        id: 'mgr-pass',
+        placeholder: 'Manager password',
+        autocomplete: 'current-password'
+      }),
+      el('div', { class: 'split-actions' }, [
+        el('button', { class: 'abtn primary', id: 'mgr-continue', type: 'submit' }, [
+          document.createTextNode('Continue')
+        ])
+      ])
+    ]);
 
-        // Submit handler (Enter works because it’s a real form)
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const val = form.querySelector('#mgr-pass').value || '';
-          try {
-            const res = await fetch(host + '/api/auth/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ password: val })
-            });
-            if (!res.ok) {
-              alert('Incorrect password');
-              return;
-  }
-            setSession({ selected: [], startedAt: Date.now() });
-            renderManagerPicker();
-          } catch {
-            alert('Could not validate password. Check network.');
-          }
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const val = form.querySelector('#mgr-pass').value || '';
+      try {
+        const res = await fetch(host + '/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: val })
         });
+        if (!res.ok) {
+          alert('Incorrect password');
+          return;
+        }
+        setSession({ selected: [], startedAt: Date.now() });
+        renderManagerPicker();
+      } catch {
+        alert('Could not validate password. Check network.');
+      }
+    });
 
-        return form;
-      })()
-    ])
-  ]);
+    return form;
+  })()
+]);
 
   split.appendChild(media);
   split.appendChild(panel);
