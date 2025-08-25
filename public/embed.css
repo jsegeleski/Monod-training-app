@@ -530,29 +530,12 @@ img.training-image { width: 100%; border-radius: 12px; border: 0px solid #e5e7eb
 
 /* Right panel */
 .split-panel {
+  flex: 1 1 40%;
   display: flex;
-  align-items: center;               /* vertical centering */
+  flex-direction: column;
   justify-content: center;
-  padding: clamp(24px, 5vw, 48px);
-  background: #fff;
-}
-.split-card {
-  width: 100%;
-  max-width: 520px;
-}
-
-/* Typography (matches your light, clean feel) */
-.split-card h1 {
-  margin: 0 0 6px;
-  font-size: clamp(28px, 3.2vw, 40px);
-  line-height: 1.15;
-  letter-spacing: .2px;
-  color: #0f172a;
-}
-.split-card p.lead {
-  margin: 0 0 22px;
-  color: #64748b;
-  font-size: clamp(15px, 1.4vw, 18px);
+  padding: 40px;   /* keep content comfortably spaced */
+  background: transparent; /* no inner block background */
 }
 
 /* Inputs / buttons reuse your existing classes */
