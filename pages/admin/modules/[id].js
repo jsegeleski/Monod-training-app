@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import { withAdminGuard } from '../../../lib/adminGuard';
+import BodyEditor from '../../../components/admin/BodyEditor';
 
 export const getServerSideProps = withAdminGuard(async () => ({ props: {} }));
 
@@ -224,15 +225,14 @@ export default function ModuleEditor() {
               />
             </div>
 
-            <div className="row">
-              <div className="label">Body (HTML OK)</div>
-              <textarea
-                className="textarea"
-                style={{ width: '100%', minHeight: 220 }}
-                value={s.bodyHtml || ''}
-                onChange={e => updateSlide(mod, setMod, i, { bodyHtml: e.target.value })}
-              />
-            </div>
+            <div className="row" style={{ gridColumn: '1 / -1' }}>
+   <div className="label">Body</div>
+   <BodyEditor
+    value={s.bodyHtml || ''}
+     onChange={(html) => updateSlide(mod, setMod, i, { bodyHtml: html })}
+     placeholder="Write the slide body…"
+   />
+ </div>
           </div>
         ) : (
           // ===== QUIZ SLIDE (unchanged layout) =====
