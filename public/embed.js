@@ -99,7 +99,7 @@ function renderManagerGate() {
   // Left: hard-coded Shopify image
   const media = el('div', { class: 'split-media' }, [
     el('img', {
-      src: 'https://cdn.shopify.com/s/files/1/0654/3881/0355/files/IMG_6856_resize.webp?v=1755808598',
+      src: 'https://cdn.shopify.com/s/files/1/0654/3881/0355/files/6U7A5031.webp?v=1755386447',
       alt: 'Training',
       loading: 'eager'
     })
