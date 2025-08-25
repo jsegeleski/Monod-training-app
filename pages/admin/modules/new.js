@@ -1,8 +1,10 @@
+// pages/admin/modules/new.js
 import { useState } from 'react';
-import Router from 'next/router'; // (delete if unused)
-
+import AdminLayout from '../../../components/admin/AdminLayout';
 import adminGuard from '../../../lib/adminGuard';
+
 export const getServerSideProps = adminGuard;
+
 
 export async function getServerSideProps(ctx) {
   const guard = requireAdmin(ctx);
