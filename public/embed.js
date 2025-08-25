@@ -87,38 +87,82 @@ function isCompleted(mod) {
 }
 
 
-    function renderManagerGate() {
-    root.innerHTML = '';
-    const card = el('div', { class: 'training-card' }, [
-      el('div', { class: 'training-hero' }, [
-        el('h2', {}, [document.createTextNode('Staff Training')]),
-        el('p', {}, [document.createTextNode('Manager access required to start a session.')])
-      ]),
-      el('div', { class: 'training-body center' }, [
-        el('input', { type:'password', class:'input', id:'mgr-pass', placeholder:'Manager password' }),
-        el('div', { class: 'training-actions' }, [
-          el('button', { class:'btn primary', id:'mgr-continue' }, [document.createTextNode('Continue')])
-        ])
-      ])
-    ]);
-    root.appendChild(card);
-    card.querySelector('#mgr-continue').addEventListener('click', async () => {
-      const val = card.querySelector('#mgr-pass').value || '';
-      // Validate against server admin the simplest way: call /admin (CORS, but we only need same pw)
-      // We can't read admin env here, so just post to login and check 200.
-      try {
-        const res = await fetch(host + '/api/auth/login', {
-          method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: val })
-        });
-        if (!res.ok) { alert('Incorrect password'); return; }
-        // Do not keep cookie; this cookie is httpOnly and domain-bound. We only need to know it passed.
-        setSession({ selected: [], startedAt: Date.now() });
-        renderManagerPicker();
-      } catch {
-        alert('Could not validate password. Check network.');
-      }
-    });
+function renderManagerGate() {
+  root.innerHTML = '';
+
+  // Outer card
+  const card = el('div', { class: 'training-card' });
+
+  // Split layout container
+  const split = el('div', { class: 'split-hero' });
+
+  // Left: hard-coded Shopify image
+  const media = el('div', { class: 'split-media' }, [
+    el('img', {
+      src: 'https://cdn.shopify.com/s/files/1/0654/3881/0355/files/IMG_6856_resize.webp?v=1755808598',
+      alt: 'Training',
+      loading: 'eager'
+    })
+  ]);
+
+  // Right: form panel
+  const panel = el('div', { class: 'split-panel' }, [
+    el('div', { class: 'split-card' }, [
+      el('h1', {}, [document.createTextNode('Staff Training')]),
+      el('p', { class: 'lead' }, [document.createTextNode('Manager access required to start a session.')]),
+
+      // Form
+      (() => {
+        const form = el('form', { class: 'slide-list' }, [
+          el('input', {
+            type: 'password',
+            class: 'input',
+            id: 'mgr-pass',
+            placeholder: 'Manager password',
+            autocomplete: 'current-password'
+          }),
+          el('div', { class: 'split-actions' }, [
+            el('button', { class: 'abtn primary', id: 'mgr-continue', type: 'submit' }, [
+              document.createTextNode('Continue')
+            ])
+          ])
+        ]);
+
+        // Submit handler (Enter works because it’s a real form)
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const val = form.querySelector('#mgr-pass').value || '';
+          try {
+            const res = await fetch(host + '/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ password: val })
+            });
+            if (!res.ok) {
+              alert('Incorrect password');
+              return;
   }
+            setSession({ selected: [], startedAt: Date.now() });
+            renderManagerPicker();
+          } catch {
+            alert('Could not validate password. Check network.');
+          }
+        });
+
+        return form;
+      })()
+    ])
+  ]);
+
+  split.appendChild(media);
+  split.appendChild(panel);
+  card.appendChild(split);
+  root.appendChild(card);
+
+  // Focus the field on mount
+  const pass = card.querySelector('#mgr-pass');
+  if (pass) setTimeout(() => pass.focus(), 0);
+}
 
 async function renderManagerPicker() {
   root.innerHTML = '';

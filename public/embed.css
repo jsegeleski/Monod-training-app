@@ -498,3 +498,76 @@ img.training-image { width: 100%; border-radius: 12px; border: 0px solid #e5e7eb
 /* Optional: tighter spacing for no-image slides */
 .training-body.no-image { margin-top: 20px; }
 .training-body.no-image h3 { margin-bottom: 12px; }
+
+/* Split hero container */
+.split-hero {
+  display: grid;
+  grid-template-columns: 3fr 2fr;         /* ~60/40 split */
+  gap: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,.08);
+  background: #fff;
+  min-height: clamp(520px, 60vh, 760px);
+}
+
+/* Left image pane */
+.split-media {
+  position: relative;
+  background: #e5e7eb;
+}
+.split-media img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+/* very subtle overlay for readability near seam */
+.split-media::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 60%, rgba(255,255,255,.15));
+}
+
+/* Right panel */
+.split-panel {
+  display: flex;
+  align-items: center;               /* vertical centering */
+  justify-content: center;
+  padding: clamp(24px, 5vw, 48px);
+  background: #fff;
+}
+.split-card {
+  width: 100%;
+  max-width: 520px;
+}
+
+/* Typography (matches your light, clean feel) */
+.split-card h1 {
+  margin: 0 0 6px;
+  font-size: clamp(28px, 3.2vw, 40px);
+  line-height: 1.15;
+  letter-spacing: .2px;
+  color: #0f172a;
+}
+.split-card p.lead {
+  margin: 0 0 22px;
+  color: #64748b;
+  font-size: clamp(15px, 1.4vw, 18px);
+}
+
+/* Inputs / buttons reuse your existing classes */
+.split-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 12px;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 900px) {
+  .split-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .split-media { height: 220px; }
+  .split-media::after { background: linear-gradient(0deg, rgba(255,255,255,0) 60%, rgba(255,255,255,.12)); }
+}
