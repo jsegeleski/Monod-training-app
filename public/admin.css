@@ -139,3 +139,76 @@
 }
 
 @media (max-width: 860px) { .row { grid-template-columns: 1fr; } .split { grid-template-columns: 1fr; } }
+
+/* ---------- Admin login two-column layout ---------- */
+.login-split {
+  display: grid;
+  grid-template-columns: 3fr 2fr;       /* ~60/40; feels like ~75/25 visually with gutters */
+  gap: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.12);
+  min-height: clamp(560px, 70vh, 900px);
+}
+
+/* LEFT: image */
+.login-hero {
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.05);
+}
+
+/* RIGHT: panel */
+.login-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(24px, 4vw, 48px);
+  gap: 12px;
+  background: #ffffff;
+}
+
+.login-title {
+  margin: 0 0 6px 0;
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: #0f172a;
+}
+
+.login-sub { margin: 0 0 20px 0; color: #64748b; }
+
+.login-form {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  width: min(100%, 420px);
+}
+
+/* visually-hidden label for a11y */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* Make the big card sit nicely on the page */
+.admin-main {
+  max-width: 1200px;      /* keeps things from being super wide on desktops */
+  margin: 6vh auto;
+  padding: 0 16px;
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 980px) {
+  .login-split {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .login-hero {
+    height: 220px;         /* hero becomes a banner */
+  }
+  .login-panel {
+    padding: 24px 18px 32px;
+  }
+}
