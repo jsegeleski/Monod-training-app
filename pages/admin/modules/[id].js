@@ -1,11 +1,11 @@
+// pages/admin/modules/[id].js
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../../components/admin/AdminLayout';
-
 import { withAdminGuard } from '../../../lib/adminGuard';
+
 export const getServerSideProps = withAdminGuard(async () => ({ props: {} }));
 
-// pick only draft fields (what we autosave)
 function draftFrom(m) {
   return {
     title: m?.title || '',
@@ -15,11 +15,12 @@ function draftFrom(m) {
   };
 }
 
+// Always include credentials so Safari/preview domains send cookies
 async function patchModule(id, payload) {
   const r = await fetch(`/api/modules/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    // credentials: 'include', // uncomment if admin runs on a different origin
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
   if (!r.ok) throw new Error(await r.text());
@@ -37,10 +38,17 @@ export default function ModuleEditor() {
   const [autoMsg, setAutoMsg] = useState('');
   const saveTimer = useRef(null);
 
-  useEffect(() => { if (id) load(); }, [id]);
+  useEffect(() => {
+    if (!id) return;
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   async function load() {
-    const r = await fetch(`/api/modules/${id}`);
+    const r = await fetch(`/api/modules/${id}`, {
+      credentials: 'include',
+      cache: 'no-store',
+    });
     if (!r.ok) return;
     const j = await r.json();
     setMod(j.module);
@@ -74,7 +82,6 @@ export default function ModuleEditor() {
     });
   }
 
-  // manual save (button). accepts field overrides for exact control.
   async function save(overrides = {}) {
     if (!mod) return;
     setBusy(true);
@@ -93,7 +100,7 @@ export default function ModuleEditor() {
     }
   }
 
-  // auto-save drafts (debounced ~1s) for title/description/accessCode/slides
+  // autosave (debounced)
   const draftKey = useMemo(() => JSON.stringify(mod ? draftFrom(mod) : null), [mod]);
   useEffect(() => {
     if (!mod) return;
@@ -113,11 +120,10 @@ export default function ModuleEditor() {
     return () => clearTimeout(saveTimer.current);
   }, [draftKey, mod?.id]);
 
-  // instant publish toggle (optimistic + rollback)
   async function togglePublish() {
     if (!mod) return;
     const next = !mod.isPublished;
-    setMod(m => ({ ...m, isPublished: next })); // optimistic
+    setMod(m => ({ ...m, isPublished: next }));
     try {
       const saved = await patchModule(mod.id, { isPublished: next });
       setMod(saved);
@@ -125,7 +131,6 @@ export default function ModuleEditor() {
       setTimeout(() => setMsg(''), 1000);
     } catch (e) {
       console.error(e);
-      // rollback
       setMod(m => ({ ...m, isPublished: !next }));
       setMsg('Publish failed');
       setTimeout(() => setMsg(''), 1500);
@@ -134,11 +139,20 @@ export default function ModuleEditor() {
 
   async function destroy() {
     if (!confirm('Delete entire module?')) return;
-    const r = await fetch(`/api/modules/${mod.id}`, { method: 'DELETE' });
+    const r = await fetch(`/api/modules/${mod.id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
     if (r.ok) router.push('/admin');
   }
 
-  if (!mod) return <AdminLayout title="Loading…"><div className="card">Loading…</div></AdminLayout>;
+  if (!mod) {
+    return (
+      <AdminLayout title="Loading…">
+        <div className="card">Loading…</div>
+      </AdminLayout>
+    );
+     }
 
 
   return (

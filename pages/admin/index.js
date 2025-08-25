@@ -1,8 +1,9 @@
+// pages/admin/index.js
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import { withAdminGuard } from '../../lib/adminGuard';
 
-import adminGuard from '../../lib/adminGuard';
-export const getServerSideProps = adminGuard;
+export const getServerSideProps = withAdminGuard(async () => ({ props: {} }));
 
 export default function AdminHome() {
   const [mods, setMods] = useState([]);
@@ -58,7 +59,7 @@ export default function AdminHome() {
     try {
       const next = !m.isPublished;
       const saved = await patchModule(m.id, { isPublished: next });
-      // reconcile with server (in case other fields changed)
+      // reconcile with server
       setMods(ms => ms.map(x => x.id === m.id ? saved : x));
     } catch (e) {
       // rollback on error
@@ -94,7 +95,6 @@ export default function AdminHome() {
                   <a className="abtn ghost" href={`/admin/modules/${m.id}`} style={{ padding: '6px 10px' }}>
                     {m.title || 'Untitled'}
                   </a>
-                  
                 </td>
                 <td>{m.slides?.length || 0}</td>
                 <td>{m.isPublished ? <span className="badge ok">Published</span> : <span className="badge">Draft</span>}</td>

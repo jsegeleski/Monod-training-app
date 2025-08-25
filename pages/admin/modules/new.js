@@ -1,10 +1,10 @@
 // pages/admin/modules/new.js
 import { useState } from 'react';
-import Router from 'next/router';                       // <— needed for Router.push
+import Router from 'next/router';
 import AdminLayout from '../../../components/admin/AdminLayout';
-import adminGuard from '../../../lib/adminGuard';
+import { withAdminGuard } from '../../../lib/adminGuard';
 
-export const getServerSideProps = adminGuard;          // only ONE export
+export const getServerSideProps = withAdminGuard(async () => ({ props: {} }));
 
 export default function NewModule() {
   const [title, setTitle] = useState('New Training');
@@ -16,6 +16,7 @@ export default function NewModule() {
 
   async function createModule(e) {
     e.preventDefault();
+    if (busy) return;
     setBusy(true);
     setErr('');
 
@@ -23,12 +24,12 @@ export default function NewModule() {
       const res = await fetch('/api/modules', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, isPublished, accessCode })
+        body: JSON.stringify({ title, description, isPublished, accessCode }),
       });
       if (!res.ok) throw new Error(await res.text());
 
-      const data = await res.json();
-      Router.push(`/admin/modules/${data.module.id}`);
+      const { module } = await res.json();
+      Router.push(`/admin/modules/${module.id}`);
     } catch (e) {
       setErr('Create failed. ' + (e?.message || ''));
       setBusy(false);
