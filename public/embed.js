@@ -122,7 +122,7 @@ function renderManagerGate() {
             autocomplete: 'current-password'
           }),
           el('div', { class: 'split-actions' }, [
-            el('button', { class: 'abtn primary', id: 'mgr-continue', type: 'submit' }, [
+            el('button', { class: 'btn primary', id: 'mgr-continue', type: 'submit' }, [
               document.createTextNode('Continue')
             ])
           ])
