@@ -545,6 +545,25 @@ img.training-image { width: 100%; border-radius: 12px; border: 0px solid #e5e7eb
   gap: 12px;
 }
 
+/* Make sure the split-panel button inherits the standard pill button look */
+.split-panel .btn {
+  border-radius: 9999px;
+  padding: 12px 18px;
+  font-weight: 600;
+  line-height: 1.2;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Your primary pill (matches the rest of the app) */
+.split-panel .btn.primary {
+  background: #111;
+  color: #fff;
+  border: 0;
+  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+}
+.split-panel .btn.primary:hover { background: #000; }
+
 /* Responsive: stack on small screens */
 @media (max-width: 900px) {
   .split-hero {
