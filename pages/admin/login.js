@@ -20,6 +20,9 @@ export default function Login() {
         body: JSON.stringify({ password: pw }),
       });
       if (!res.ok) { setErr('Incorrect password'); setBusy(false); return; }
+// Force a fresh navigation; avoid bfcache hiccups
+window.location.assign('/admin?auth=1&ts=' + Date.now());
+      if (!res.ok) { setErr('Incorrect password'); setBusy(false); return; }
 
       // give the browser a beat to commit Set-Cookie, then do a client nav
       await new Promise(r => setTimeout(r, 150));
@@ -50,8 +53,8 @@ export default function Login() {
 
           {/* Right: form panel */}
           <div className="login-panel">
-            <h1 className="login-title">Staff Training</h1>
-            <p className="help login-sub">Manager access required to start a session.</p>
+            <h1 className="login-title">Staff Training Admin Dashboard</h1>
+            <p className="help login-sub">Manager access to edit staff training portal</p>
 
             <form onSubmit={submit} className="login-form">
               <label className="sr-only" htmlFor="pw">Manager password</label>

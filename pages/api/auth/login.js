@@ -15,7 +15,6 @@ function applyCORS(req, res) {
 
 export default function handler(req, res) {
   applyCORS(req, res);
-
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
@@ -23,34 +22,28 @@ export default function handler(req, res) {
   if (!process.env.ADMIN_PASSWORD) return res.status(500).json({ ok:false, error:'Server misconfigured' });
   if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ ok:false, error:'Invalid password' });
 
-  const isProd = process.env.NODE_ENV === 'production';
+  // Always set Secure (Vercel is HTTPS) and SameSite=None to keep Safari happy after POST.
   const maxAge = 60 * 60 * 24 * 7; // 7 days
-
   const admin = serialize('admin', '1', {
     httpOnly: true,
-    secure: isProd,
-    sameSite: 'lax',
-    path: '/',
-    maxAge,
-  });
-
-  const adminEmbed = serialize('admin_embed', '1', {
-    httpOnly: true,
-    secure: true,       // SameSite=None requires Secure
+    secure: true,
     sameSite: 'none',
     path: '/',
-    maxAge,
+    maxAge
   });
 
-  // Legacy name some parts of your code may still read
-  const legacy = serialize('admin_auth', 'true', {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: 'lax',
+  // Optional: a non-HttpOnly mirror so you can **see** it in Safari DevTools Storage if needed.
+  const adminClient = serialize('admin_client', '1', {
+    httpOnly: false,
+    secure: true,
+    sameSite: 'none',
     path: '/',
-    maxAge,
+    maxAge
   });
 
-  res.setHeader('Set-Cookie', [admin, adminEmbed, legacy]);
+  res.setHeader('Set-Cookie', [admin, adminClient]);
+  // Avoid bfcache weirdness in Safari
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+
   return res.status(200).json({ ok: true });
 }
