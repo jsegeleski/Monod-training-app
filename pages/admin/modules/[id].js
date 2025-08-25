@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../../components/admin/AdminLayout';
+import { withAdminGuard } from '../../../lib/adminGuard';
+export const getServerSideProps = withAdminGuard(async (ctx) => ({ props: {} }));
 
 // pick only draft fields (what we autosave)
 function draftFrom(m) {
