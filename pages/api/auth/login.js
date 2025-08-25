@@ -1,7 +1,5 @@
-// pages/api/auth/login.js
 import { serialize } from 'cookie';
 
-// Allow your storefront + local dev (for the embed)
 const ALLOWED_ORIGINS = [process.env.STOREFRONT_ORIGIN, process.env.LOCAL_ORIGIN].filter(Boolean);
 
 function applyCORS(req, res) {
@@ -22,18 +20,13 @@ export default function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { password } = req.body || {};
-  if (!process.env.ADMIN_PASSWORD) {
-    return res.status(500).json({ ok: false, error: 'Server misconfigured' });
-  }
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ ok: false, error: 'Invalid password' });
-  }
+  if (!process.env.ADMIN_PASSWORD) return res.status(500).json({ ok:false, error:'Server misconfigured' });
+  if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ ok:false, error:'Invalid password' });
 
   const isProd = process.env.NODE_ENV === 'production';
   const maxAge = 60 * 60 * 24 * 7; // 7 days
 
-  // SAME-SITE cookie used by the admin dashboard
-  const sameSiteAdmin = serialize('admin', '1', {
+  const admin = serialize('admin', '1', {
     httpOnly: true,
     secure: isProd,
     sameSite: 'lax',
@@ -41,17 +34,23 @@ export default function handler(req, res) {
     maxAge,
   });
 
-  // CROSS-SITE cookie used by the embedded storefront (must be None; Secure)
-  const crossSiteEmbed = serialize('admin_embed', '1', {
+  const adminEmbed = serialize('admin_embed', '1', {
     httpOnly: true,
-    secure: true,            // required for SameSite=None
+    secure: true,       // SameSite=None requires Secure
     sameSite: 'none',
     path: '/',
     maxAge,
   });
 
-  // Send both so either context can validate
-  res.setHeader('Set-Cookie', [sameSiteAdmin, crossSiteEmbed]);
+  // Legacy name some parts of your code may still read
+  const legacy = serialize('admin_auth', 'true', {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: 'lax',
+    path: '/',
+    maxAge,
+  });
 
+  res.setHeader('Set-Cookie', [admin, adminEmbed, legacy]);
   return res.status(200).json({ ok: true });
 }
