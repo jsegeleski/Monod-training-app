@@ -120,9 +120,11 @@ const panel = el('div', { class: 'split-panel' }, [
         autocomplete: 'current-password'
       }),
       el('div', { class: 'split-actions' }, [
-        el('button', { class: 'abtn primary', id: 'mgr-continue', type: 'submit' }, [
-          document.createTextNode('Continue')
-        ])
+        el('button', {
+            id: 'mgr-continue',
+            class: 'btn primary',
+            type: 'button'
+          }, [document.createTextNode('Continue')])
       ])
     ]);
 
