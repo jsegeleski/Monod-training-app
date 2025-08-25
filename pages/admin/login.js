@@ -1,19 +1,15 @@
-import { useRef, useState } from 'react';
+// pages/admin/login.js
+import { useState } from 'react';
 import Head from 'next/head';
 
 export default function Login() {
   const [pw, setPw] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
-  const formRef = useRef(null);
 
   async function submit(e) {
-    if (e) e.preventDefault();
-    if (busy) return;
-
-    setBusy(true);
-    setErr('');
-
+    e.preventDefault();
+    setBusy(true); setErr('');
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -21,15 +17,8 @@ export default function Login() {
         credentials: 'include',
         body: JSON.stringify({ password: pw }),
       });
-
-      if (!res.ok) {
-        setErr('Incorrect password');
-        setBusy(false);
-        return;
-      }
-
-      // single, reliable redirect
-      window.location.replace('/admin');
+      if (!res.ok) { setErr('Incorrect password'); setBusy(false); return; }
+      setTimeout(() => window.location.replace('/admin'), 60);
     } catch (e) {
       setErr(e.message || 'Login failed');
       setBusy(false);
@@ -40,52 +29,48 @@ export default function Login() {
     <div className="admin-wrap">
       <Head>
         <title>Admin Login</title>
-        {/* fix attribute name */}
         <link rel="stylesheet" href="/admin.css" />
       </Head>
 
       <main className="admin-main">
-        <div className="card" style={{ maxWidth: 420, margin: '10vh auto 0' }}>
-          <h2 style={{ margin: '0 0 6px' }}>Sign in</h2>
-          <p className="help" style={{ margin: '0 0 16px' }}>
-            Enter manager/admin password
-          </p>
-
-          <form
-            ref={formRef}
-            onSubmit={submit}
-            className="slide-list"
-            onKeyDown={(e) => {
-              // capture Enter anywhere inside the form
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                // ask the browser to submit this form
-                formRef.current?.requestSubmit();
-              }
+        <div className="login-split">
+          {/* Left: hero image (hardcoded Shopify URL) */}
+          <div
+            className="login-hero"
+            style={{
+              backgroundImage: "url('https://cdn.shopify.com/s/files/1/0654/3881/0355/files/6U7A5031.webp?v=1755386447')"
             }}
-          >
-            <input
-              className="input"
-              type="password"
-              name="password"
-              autoFocus
-              value={pw}
-              onChange={(e) => setPw(e.target.value)}
-              placeholder="Password"
-            />
+            aria-hidden="true"
+          />
 
-            {err ? (
-              <div className="badge" style={{ borderColor: '#5a2430', color: '#ffb4b4' }}>
-                ⚠ {err}
-              </div>
-            ) : null}
+          {/* Right: form panel */}
+          <div className="login-panel">
+            <h1 className="login-title">Staff Training</h1>
+            <p className="help login-sub">Manager access required to start a session.</p>
 
-            {/* real submit control so browsers reliably submit on Enter */}
-            <button type="submit" className="abtn primary" disabled={busy}>
-              {busy ? 'Signing in…' : 'Continue'}
-            </button>
-            <input type="submit" hidden aria-hidden="true" tabIndex={-1} />
-          </form>
+            <form onSubmit={submit} className="login-form">
+              <label className="sr-only" htmlFor="pw">Manager password</label>
+              <input
+                id="pw"
+                className="input"
+                type="password"
+                value={pw}
+                onChange={e=>setPw(e.target.value)}
+                placeholder="Manager password"
+                autoFocus
+                autoComplete="current-password"
+              />
+              {err ? (
+                <div className="badge" style={{borderColor:'#5a2430', color:'#ffb4b4'}}>
+                  ⚠ {err}
+                </div>
+              ) : null}
+
+              <button className="abtn primary" disabled={busy} type="submit">
+                {busy ? 'Signing in…' : 'Continue'}
+              </button>
+            </form>
+          </div>
         </div>
       </main>
     </div>
