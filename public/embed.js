@@ -90,76 +90,85 @@ function isCompleted(mod) {
 function renderManagerGate() {
   root.innerHTML = '';
 
-  // Outer card
-  const card = el('div', { class: 'training-card' });
+  const card = el('div', { class: 'training-card' }, [
+    el('div', { class: 'split-hero' }, [
+      el('div', { class: 'split-media' }, [
+        el('img', {
+          src: 'https://cdn.shopify.com/s/files/1/0654/3881/0355/files/IMG_6856_resize.webp?v=1755808598',
+          alt: 'Training'
+        })
+      ]),
+      el('div', { class: 'split-panel' }, [
+        el('h1', {}, [document.createTextNode('Staff Training')]),
+        el('p', { class: 'lead' }, [document.createTextNode('Manager access required to start a session.')]),
 
-  // Split layout container
-  const split = el('div', { class: 'split-hero' });
+        // input
+        el('input', {
+          type: 'password',
+          class: 'input',
+          id: 'mgr-pass',
+          placeholder: 'Manager password',
+          autocomplete: 'current-password'
+        }),
 
-  // Left: hard-coded Shopify image
-  const media = el('div', { class: 'split-media' }, [
-    el('img', {
-      src: 'https://cdn.shopify.com/s/files/1/0654/3881/0355/files/IMG_6856_resize.webp?v=1755808598',
-      alt: 'Training',
-      loading: 'eager'
-    })
-  ]);
+        // error spot (hidden by default)
+        el('div', { id: 'mgr-err', style: 'display:none; color:#b91c1c; margin-top:8px; font-size:14px;' }, [
+          document.createTextNode('Incorrect password. Please try again.')
+        ]),
 
- // Right: form panel (no nested card)
-const panel = el('div', { class: 'split-panel' }, [
-  el('h1', {}, [document.createTextNode('Staff Training')]),
-  el('p', { class: 'lead' }, [document.createTextNode('Manager access required to start a session.')]),
-
-  (() => {
-    const form = el('form', { class: 'slide-list' }, [
-      el('input', {
-        type: 'password',
-        class: 'input',
-        id: 'mgr-pass',
-        placeholder: 'Manager password',
-        autocomplete: 'current-password'
-      }),
-      el('div', { class: 'split-actions' }, [
-        el('button', {
+        // actions
+        el('div', { class: 'split-actions' }, [
+          el('button', {
             id: 'mgr-continue',
             class: 'btn primary',
             type: 'button'
           }, [document.createTextNode('Continue')])
+        ])
       ])
-    ]);
+    ])
+  ]);
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const val = form.querySelector('#mgr-pass').value || '';
-      try {
-        const res = await fetch(host + '/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: val })
-        });
-        if (!res.ok) {
-          alert('Incorrect password');
-          return;
-        }
-        setSession({ selected: [], startedAt: Date.now() });
-        renderManagerPicker();
-      } catch {
-        alert('Could not validate password. Check network.');
-      }
-    });
-
-    return form;
-  })()
-]);
-
-  split.appendChild(media);
-  split.appendChild(panel);
-  card.appendChild(split);
   root.appendChild(card);
 
-  // Focus the field on mount
-  const pass = card.querySelector('#mgr-pass');
-  if (pass) setTimeout(() => pass.focus(), 0);
+  const passEl = card.querySelector('#mgr-pass');
+  const errEl  = card.querySelector('#mgr-err');
+  const btnEl  = card.querySelector('#mgr-continue');
+
+  const go = async () => {
+    errEl.style.display = 'none';
+    const val = (passEl.value || '').trim();
+    if (!val) { passEl.focus(); return; }
+
+    btnEl.disabled = true;
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',                // important for cookie
+        body: JSON.stringify({ password: val })
+      });
+
+      if (!res.ok) {
+        errEl.style.display = 'block';
+        btnEl.disabled = false;
+        return;
+      }
+
+      // success -> start a session & go to module picker
+      setSession({ selected: [], startedAt: Date.now() });
+      renderManagerPicker();
+    } catch (e) {
+      console.error('login error', e);
+      errEl.textContent = 'Network problem. Please try again.';
+      errEl.style.display = 'block';
+      btnEl.disabled = false;
+    }
+  };
+
+  btnEl.addEventListener('click', go);
+  passEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+  passEl.focus();
 }
 
 async function renderManagerPicker() {
