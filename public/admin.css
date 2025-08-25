@@ -199,20 +199,82 @@
   padding: 0 16px;
 }
 
-/* Quill tweaks inside cards */
-.quill-wrap .ql-toolbar.ql-snow {
-  border-radius: 10px 10px 0 0;
-  border-color: #e5e7eb;
+/* === Quill (snow) dark polish for admin === */
+.admin-wrap .ql-toolbar.ql-snow {
+  background: #0f1620;                 /* toolbar bg */
+  border: 1px solid #2a3344;
+  border-bottom: 0;
+  color: #cbd5e1;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
-.quill-wrap .ql-container.ql-snow {
+
+.admin-wrap .ql-container.ql-snow {
+  background: #0b111b;                 /* editor bg */
+  border: 1px solid #2a3344;
+  border-top: 0;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.admin-wrap .ql-editor {
   min-height: 220px;
-  border-radius: 0 0 10px 10px;
-  border-color: #e5e7eb;
-  background: #fff;
-}
-.quill-wrap .ql-editor {
-  font-size: 16px;
+  color: #e5e7eb;                      /* main text */
   line-height: 1.55;
+}
+
+.admin-wrap .ql-editor.ql-blank::before {
+  color: #8aa0b3;                      /* placeholder */
+  opacity: 0.7;
+}
+
+/* toolbar icons & buttons */
+.admin-wrap .ql-snow .ql-stroke { stroke: #cbd5e1; }
+.admin-wrap .ql-snow .ql-fill   { fill:   #cbd5e1; }
+.admin-wrap .ql-snow .ql-picker { color:  #cbd5e1; }
+
+.admin-wrap .ql-snow .ql-picker-label:hover,
+.admin-wrap .ql-snow .ql-picker-item:hover,
+.admin-wrap .ql-snow .ql-toolbar button:hover,
+.admin-wrap .ql-snow .ql-toolbar button.ql-active {
+  color: #fff;
+}
+.admin-wrap .ql-snow .ql-toolbar button:hover .ql-stroke,
+.admin-wrap .ql-snow .ql-toolbar button.ql-active .ql-stroke { stroke: #fff; }
+.admin-wrap .ql-snow .ql-toolbar button:hover .ql-fill,
+.admin-wrap .ql-snow .ql-toolbar button.ql-active .ql-fill   { fill:   #fff; }
+
+/* dropdown menus */
+.admin-wrap .ql-snow .ql-picker-options {
+  background: #101826;
+  border: 1px solid #2a3344;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.35);
+}
+.admin-wrap .ql-snow .ql-picker-item.ql-selected,
+.admin-wrap .ql-snow .ql-picker-item:hover {
+  color: #e5e7eb;
+}
+
+/* content readability helpers */
+.admin-wrap .ql-editor a { color: #60a5fa; text-decoration: underline; }
+.admin-wrap .ql-editor code,
+.admin-wrap .ql-editor pre {
+  background: #0c1422;
+  border: 1px solid #263248;
+  border-radius: 8px;
+  padding: .15rem .35rem;
+  color: #e6edf3;
+}
+.admin-wrap .ql-editor h1,
+.admin-wrap .ql-editor h2,
+.admin-wrap .ql-editor h3 { color: #f8fafc; }
+
+/* focus ring */
+.admin-wrap .ql-container.ql-snow.ql-container-focus,
+.admin-wrap .ql-toolbar.ql-snow:has(+ .ql-container.ql-container-focus) {
+  box-shadow: 0 0 0 3px rgba(99, 179, 237, .25);
+  border-color: #3b82f6;
 }
 
 /* Responsive: stack on small screens */
