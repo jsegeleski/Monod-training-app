@@ -1,8 +1,10 @@
 // pages/admin/login.js
 import { useState } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 
 export default function Login() {
+  const router = useRouter();
   const [pw, setPw] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -18,7 +20,10 @@ export default function Login() {
         body: JSON.stringify({ password: pw }),
       });
       if (!res.ok) { setErr('Incorrect password'); setBusy(false); return; }
-      setTimeout(() => window.location.replace('/admin'), 60);
+
+      // give the browser a beat to commit Set-Cookie, then do a client nav
+      await new Promise(r => setTimeout(r, 150));
+      router.replace('/admin'); // client-side navigation
     } catch (e) {
       setErr(e.message || 'Login failed');
       setBusy(false);
