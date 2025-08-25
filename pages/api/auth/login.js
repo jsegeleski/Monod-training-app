@@ -1,20 +1,6 @@
 import { serialize } from 'cookie';
 
-const ALLOWED_ORIGINS = [process.env.STOREFRONT_ORIGIN, process.env.LOCAL_ORIGIN].filter(Boolean);
-
-function applyCORS(req, res) {
-  const origin = req.headers.origin;
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
-
 export default function handler(req, res) {
-  applyCORS(req, res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
@@ -22,28 +8,45 @@ export default function handler(req, res) {
   if (!process.env.ADMIN_PASSWORD) return res.status(500).json({ ok:false, error:'Server misconfigured' });
   if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ ok:false, error:'Invalid password' });
 
-  // Always set Secure (Vercel is HTTPS) and SameSite=None to keep Safari happy after POST.
   const maxAge = 60 * 60 * 24 * 7; // 7 days
-  const admin = serialize('admin', '1', {
+  const host = (req.headers.host || '').split(':')[0];      // strip port if any
+  const parts = host.split('.');
+  const topLevel =
+    parts.length >= 2 ? `.${parts.slice(-2).join('.')}` : undefined; // ".example.com"
+
+  const cookies = [];
+
+  // Host-only (always)
+  cookies.push(serialize('admin', '1', {
     httpOnly: true,
     secure: true,
     sameSite: 'none',
     path: '/',
-    maxAge
-  });
+    maxAge,
+  }));
 
-  // Optional: a non-HttpOnly mirror so you can **see** it in Safari DevTools Storage if needed.
-  const adminClient = serialize('admin_client', '1', {
+  // Parent-domain (if we can compute one, helps www <-> apex)
+  if (topLevel && topLevel.includes('.')) {
+    cookies.push(serialize('admin_wide', '1', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+      domain: topLevel,                   // <- covers both www and apex
+      maxAge,
+    }));
+  }
+
+  // Optional visible mirror for debugging
+  cookies.push(serialize('admin_client', '1', {
     httpOnly: false,
     secure: true,
     sameSite: 'none',
     path: '/',
-    maxAge
-  });
+    maxAge,
+  }));
 
-  res.setHeader('Set-Cookie', [admin, adminClient]);
-  // Avoid bfcache weirdness in Safari
+  res.setHeader('Set-Cookie', cookies);
   res.setHeader('Cache-Control', 'no-store, max-age=0');
-
   return res.status(200).json({ ok: true });
 }

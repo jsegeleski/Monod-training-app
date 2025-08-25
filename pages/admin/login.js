@@ -1,34 +1,51 @@
 // pages/admin/login.js
-import { useState } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { parse } from 'cookie';
 
-export default function Login() {
-  const router = useRouter();
+export async function getServerSideProps(ctx) {
+  const cookies = parse(ctx.req?.headers?.cookie || '');
+  const authed =
+    cookies.admin === '1' ||
+    cookies.admin_auth === 'true' ||
+    cookies.admin_client === '1';
+
+  // Avoid bfcache weirdness and stale screens
+  ctx.res.setHeader('Cache-Control', 'no-store, max-age=0');
+
+  if (authed) {
+    return { redirect: { destination: '/admin', permanent: false } };
+  }
+  return { props: {} };
+}
+
+export default function AdminLogin() {
   const [pw, setPw] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
   async function submit(e) {
     e.preventDefault();
-    setBusy(true); setErr('');
+    if (busy) return;
+    setBusy(true);
+    setErr('');
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        credentials: 'include',                 // keep for Safari
         body: JSON.stringify({ password: pw }),
       });
-      if (!res.ok) { setErr('Incorrect password'); setBusy(false); return; }
-// Force a fresh navigation; avoid bfcache hiccups
-window.location.assign('/admin?auth=1&ts=' + Date.now());
-      if (!res.ok) { setErr('Incorrect password'); setBusy(false); return; }
+      if (!res.ok) {
+        setErr('Incorrect password');
+        setBusy(false);
+        return;
+      }
 
-      // give the browser a beat to commit Set-Cookie, then do a client nav
-      await new Promise(r => setTimeout(r, 150));
-      router.replace('/admin'); // client-side navigation
+      // Hard navigation + cache buster to avoid Safari bfcache restoring login
+      window.location.assign('/admin?ts=' + Date.now());
     } catch (e) {
-      setErr(e.message || 'Login failed');
+      setErr(e?.message || 'Login failed');
       setBusy(false);
     }
   }
