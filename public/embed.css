@@ -499,12 +499,7 @@ img.training-image { width: 100%; border-radius: 12px; border: 0px solid #e5e7eb
 .training-body.no-image { margin-top: 20px; }
 .training-body.no-image h3 { margin-bottom: 12px; }
 
-/* 1) Let the split layout fill the entire card */
-.training-card {
-  /* keep your border/radius/shadow if you like */
-  padding: 0;                 /* ← remove inner gutter that created the inner block */
-  overflow: hidden;           /* clip corners for the full-bleed image */
-}
+
 
 /* 2) Full-bleed split layout (image left, form right) */
 .split-hero {
