@@ -63,7 +63,7 @@ export default function AdminLogin() {
           <div
             className="login-hero"
             style={{
-              backgroundImage: "url('https://cdn.shopify.com/s/files/1/0654/3881/0355/files/6U7A5031.webp?v=1755386447')"
+              backgroundImage: "url('https://cdn.shopify.com/s/files/1/0654/3881/0355/files/IMG_6843_resize.webp?v=1756151828')"
             }}
             aria-hidden="true"
           />
